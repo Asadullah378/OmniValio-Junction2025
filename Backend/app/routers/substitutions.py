@@ -40,12 +40,60 @@ def get_pre_order_optimization(order_id: str, db: Session = Depends(get_db)):
             ).first()
             
             if product:
-                # Find alternatives (same category, same temperature zone)
-                alternatives = db.query(models.Product).filter(
-                    models.Product.product_code != line.product_code,
-                    models.Product.category == product.category,
-                    models.Product.temperature_zone == product.temperature_zone
-                ).limit(3).all()
+                # Try to use AI recommendation service
+                alternatives = []
+                used_ai = False
+                try:
+                    from app.AI_Services.product_recommender import get_recommender
+                    
+                    recommender = get_recommender()
+                    if recommender.available:
+                        # Build search text from product
+                        search_text = recommender.build_search_text(product)
+                        
+                        # Get recommendations by text (using product embedding)
+                        recommended_gtins = recommender.get_recommendations_by_text(search_text, top_k=3)
+                        
+                        if recommended_gtins:
+                            # Find products by GTIN (handle .0 suffix)
+                            for gtin in recommended_gtins:
+                                # Try exact match
+                                db_product = db.query(models.Product).filter(
+                                    models.Product.gtin == gtin
+                                ).first()
+                                
+                                # Try with .0 suffix
+                                if not db_product and gtin.endswith('.0'):
+                                    gtin_clean = gtin[:-2]
+                                    db_product = db.query(models.Product).filter(
+                                        models.Product.gtin == gtin_clean
+                                    ).first()
+                                
+                                # Try without .0 if it doesn't have it
+                                if not db_product and not gtin.endswith('.0'):
+                                    gtin_with_suffix = f"{gtin}.0"
+                                    db_product = db.query(models.Product).filter(
+                                        models.Product.gtin == gtin_with_suffix
+                                    ).first()
+                                
+                                if db_product and db_product.product_code != line.product_code:
+                                    alternatives.append(db_product)
+                                    if len(alternatives) >= 3:
+                                        break
+                            
+                            if alternatives:
+                                used_ai = True
+                except Exception as e:
+                    # Fall back to simple logic if AI service fails
+                    print(f"AI recommendation service error: {e}")
+                
+                # Fallback: Find alternatives (same category, same temperature zone)
+                if not alternatives:
+                    alternatives = db.query(models.Product).filter(
+                        models.Product.product_code != line.product_code,
+                        models.Product.category == product.category,
+                        models.Product.temperature_zone == product.temperature_zone
+                    ).limit(3).all()
                 
                 suggested_alts = []
                 for idx, alt in enumerate(alternatives):
@@ -55,11 +103,12 @@ def get_pre_order_optimization(order_id: str, db: Session = Depends(get_db)):
                     elif idx == 1:
                         quality = models.SubstitutionQuality.BETTER
                     
+                    reason = "AI-recommended alternative" if used_ai else f"Same category ({alt.category}), lower risk"
                     suggested_alts.append(schemas.SubstitutionAlternative(
                         alt_product_code=alt.product_code,
                         alt_product_name=alt.product_name,
                         substitution_quality=quality,
-                        reason=f"Same category ({alt.category}), lower risk",
+                        reason=reason,
                         availability_status="AVAILABLE"
                     ))
                 

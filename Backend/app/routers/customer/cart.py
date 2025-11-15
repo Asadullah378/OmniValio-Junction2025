@@ -321,9 +321,14 @@ def clear_cart(
     ).first()
     
     if cart:
-        db.query(models.CartItem).filter(
+        # Delete items individually to trigger cascade delete of substitutes
+        cart_items = db.query(models.CartItem).filter(
             models.CartItem.cart_id == cart.cart_id
-        ).delete()
+        ).all()
+        
+        for cart_item in cart_items:
+            db.delete(cart_item)  # This will cascade delete the substitutes
+        
         db.commit()
     
     return None

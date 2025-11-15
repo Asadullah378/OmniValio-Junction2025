@@ -2,7 +2,7 @@
 Pydantic schemas for API request/response validation
 """
 from pydantic import BaseModel, Field
-from typing import Optional, List
+from typing import Optional, List, Generic, TypeVar
 from datetime import datetime
 from app.models import (
     PriorityLevel, ContactChannel, Language, OrderStatus, 
@@ -48,9 +48,30 @@ class Customer(CustomerBase):
 # Product Schemas
 class ProductBase(BaseModel):
     product_name: str
+    gtin: Optional[str] = None
+    product_name_en: Optional[str] = None
+    product_name_fi: Optional[str] = None
+    category_code: Optional[str] = None
     category: Optional[str] = None
     sub_category: Optional[str] = None
+    vendor_name: Optional[str] = None
+    country_of_origin: Optional[str] = None
+    temperature_condition: Optional[float] = None
     temperature_zone: Optional[str] = None
+    sales_unit: Optional[str] = None
+    base_unit: Optional[str] = None
+    allowed_lot_size: Optional[float] = None
+    marketing_text: Optional[str] = None
+    ingredients: Optional[str] = None
+    storage_instructions: Optional[str] = None
+    allergens: Optional[str] = None
+    labels: Optional[str] = None
+    energy_kj: Optional[float] = None
+    protein: Optional[float] = None
+    carbohydrates: Optional[float] = None
+    fat: Optional[float] = None
+    sugar: Optional[float] = None
+    salt: Optional[float] = None
     shelf_life_days: Optional[int] = None
     unit_size: Optional[str] = None
     unit_type: Optional[str] = None
@@ -66,6 +87,26 @@ class Product(ProductBase):
     created_at: datetime
     updated_at: datetime
 
+    class Config:
+        from_attributes = True
+
+
+# Paginated Response Schema
+T = TypeVar('T')
+
+class PaginatedResponse(BaseModel, Generic[T]):
+    items: List[T]
+    total: int
+    skip: int
+    limit: int
+    has_more: bool
+
+
+# Category Schema
+class Category(BaseModel):
+    category: str
+    sub_categories: List[str]
+    
     class Config:
         from_attributes = True
 
@@ -151,6 +192,33 @@ class OrderRiskScore(BaseModel):
     order_id: str
     overall_order_risk: float
     line_risks: List[LineRisk]
+
+
+# Risk Assessment Schemas
+class ProductRiskRequest(BaseModel):
+    """Single product risk assessment request"""
+    product_code: str
+    order_qty: float = Field(gt=0, description="Order quantity (must be > 0)")
+    order_created_date: str = Field(description="Order creation date (YYYY-MM-DD)")
+    requested_delivery_date: str = Field(description="Requested delivery date (YYYY-MM-DD)")
+
+
+class BatchRiskAssessmentRequest(BaseModel):
+    """Batch risk assessment request"""
+    products: List[ProductRiskRequest] = Field(min_length=1, description="List of products to assess")
+
+
+class ProductRiskResponse(BaseModel):
+    """Single product risk assessment response"""
+    product_code: str
+    shortage_probability: float = Field(ge=0.0, le=1.0, description="Risk probability (0-1)")
+
+
+class BatchRiskAssessmentResponse(BaseModel):
+    """Batch risk assessment response"""
+    predictions: List[ProductRiskResponse]
+    total_products: int
+    high_risk_count: int = Field(description="Number of products with shortage_probability > 0.5")
 
 
 # Substitution Schemas

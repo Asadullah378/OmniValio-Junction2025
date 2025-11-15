@@ -41,7 +41,7 @@ export function Layout({ children, navItems }: LayoutProps) {
     <div className="min-h-screen bg-background">
       {/* Top Bar */}
       <header className="sticky top-0 z-50 w-full border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
-        <div className="container flex h-16 items-center justify-between px-6">
+        <div className="flex h-16 items-center justify-between px-6">
           <div className="flex items-center gap-3">
             <Package className="h-8 w-8 text-primary" />
             <h1 className="text-xl font-semibold">Omni-Valio</h1>
@@ -54,7 +54,7 @@ export function Layout({ children, navItems }: LayoutProps) {
             </div>
 
             {/* Language Selector */}
-            <DropdownMenu>
+            {/* <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="sm">
                   <Globe className="h-4 w-4" />
@@ -72,7 +72,7 @@ export function Layout({ children, navItems }: LayoutProps) {
                   Svenska {language === 'sv' && '✓'}
                 </DropdownMenuItem>
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
 
             {/* User Menu */}
             <DropdownMenu>

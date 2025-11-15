@@ -272,7 +272,7 @@
             "customer-products"
           ],
           "summary": "Browse Products",
-          "description": "Browse products with optional filters",
+          "description": "Browse products with pagination and filters\n\n- **skip**: Number of items to skip (for pagination)\n- **limit**: Maximum number of items to return (default: 20)\n- **category**: Filter by category name\n- **sub_category**: Filter by subcategory name\n- **search**: Search in product names, codes, and GTIN\n- **temperature_zone**: Filter by temperature zone (frozen, chilled, ambient)",
           "operationId": "browse_products_customer_products__get",
           "security": [
             {
@@ -296,7 +296,7 @@
               "required": false,
               "schema": {
                 "type": "integer",
-                "default": 100,
+                "default": 20,
                 "title": "Limit"
               }
             },
@@ -317,6 +317,22 @@
               }
             },
             {
+              "name": "sub_category",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Sub Category"
+              }
+            },
+            {
               "name": "search",
               "in": "query",
               "required": false,
@@ -331,6 +347,22 @@
                 ],
                 "title": "Search"
               }
+            },
+            {
+              "name": "temperature_zone",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Temperature Zone"
+              }
             }
           ],
           "responses": {
@@ -339,11 +371,7 @@
               "content": {
                 "application/json": {
                   "schema": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/Product"
-                    },
-                    "title": "Response Browse Products Customer Products  Get"
+                    "$ref": "#/components/schemas/PaginatedResponse_Product_"
                   }
                 }
               }
@@ -359,6 +387,37 @@
               }
             }
           }
+        }
+      },
+      "/customer/products/categories": {
+        "get": {
+          "tags": [
+            "customer-products"
+          ],
+          "summary": "Get Categories",
+          "description": "Get all product categories with their subcategories\n\nReturns a list of categories, each containing:\n- category: The main category name\n- sub_categories: List of subcategory names under this category",
+          "operationId": "get_categories_customer_products_categories_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "items": {
+                      "$ref": "#/components/schemas/Category"
+                    },
+                    "type": "array",
+                    "title": "Response Get Categories Customer Products Categories Get"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
         }
       },
       "/customer/products/{product_code}": {
@@ -409,37 +468,31 @@
           }
         }
       },
-      "/customer/products/{product_code}/risk": {
-        "get": {
+      "/customer/products/risk/batch": {
+        "post": {
           "tags": [
             "customer-products"
           ],
-          "summary": "Get Product Risk",
-          "description": "Get product risk evaluation (0-1 range)",
-          "operationId": "get_product_risk_customer_products__product_code__risk_get",
-          "security": [
-            {
-              "OAuth2PasswordBearer": []
-            }
-          ],
-          "parameters": [
-            {
-              "name": "product_code",
-              "in": "path",
-              "required": true,
-              "schema": {
-                "type": "string",
-                "title": "Product Code"
+          "summary": "Assess Products Risk",
+          "description": "Assess risk for multiple products using the risk prediction API\n\nReturns shortage_probability (0-1) for each product",
+          "operationId": "assess_products_risk_customer_products_risk_batch_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchRiskAssessmentRequest"
+                }
               }
-            }
-          ],
+            },
+            "required": true
+          },
           "responses": {
             "200": {
               "description": "Successful Response",
               "content": {
                 "application/json": {
                   "schema": {
-  
+                    "$ref": "#/components/schemas/BatchRiskAssessmentResponse"
                   }
                 }
               }
@@ -454,7 +507,12 @@
                 }
               }
             }
-          }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
         }
       },
       "/customer/products/{product_code}/similar": {
@@ -463,7 +521,7 @@
             "customer-products"
           ],
           "summary": "Get Similar Products",
-          "description": "Get similar products (dummy endpoint - will use AI later)",
+          "description": "Get similar products using AI-based semantic search",
           "operationId": "get_similar_products_customer_products__product_code__similar_get",
           "security": [
             {
@@ -520,35 +578,6 @@
         }
       },
       "/customer/orders/": {
-        "get": {
-          "tags": [
-            "customer-orders"
-          ],
-          "summary": "Get Orders",
-          "description": "Get all customer orders with product information",
-          "operationId": "get_orders_customer_orders__get",
-          "responses": {
-            "200": {
-              "description": "Successful Response",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "items": {
-                      "$ref": "#/components/schemas/OrderWithDetails"
-                    },
-                    "type": "array",
-                    "title": "Response Get Orders Customer Orders  Get"
-                  }
-                }
-              }
-            }
-          },
-          "security": [
-            {
-              "OAuth2PasswordBearer": []
-            }
-          ]
-        },
         "post": {
           "tags": [
             "customer-orders"
@@ -556,15 +585,20 @@
           "summary": "Place Order",
           "description": "Place order from cart",
           "operationId": "place_order_customer_orders__post",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
           "requestBody": {
+            "required": true,
             "content": {
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/OrderPlaceFromCart"
                 }
               }
-            },
-            "required": true
+            }
           },
           "responses": {
             "200": {
@@ -587,12 +621,64 @@
                 }
               }
             }
-          },
+          }
+        },
+        "get": {
+          "tags": [
+            "customer-orders"
+          ],
+          "summary": "Get Orders",
+          "description": "Get all customer orders with product information, optionally filtered by status",
+          "operationId": "get_orders_customer_orders__get",
           "security": [
             {
               "OAuth2PasswordBearer": []
             }
-          ]
+          ],
+          "parameters": [
+            {
+              "name": "status",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Status"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/OrderWithDetails"
+                    },
+                    "title": "Response Get Orders Customer Orders  Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
         }
       },
       "/customer/orders/{order_id}": {
@@ -863,7 +949,7 @@
             "customer-claims"
           ],
           "summary": "Get Claims",
-          "description": "Get all customer claims",
+          "description": "Get all customer claims with attachments",
           "operationId": "get_claims_customer_claims__get",
           "responses": {
             "200": {
@@ -900,7 +986,7 @@
               "content": {
                 "application/json": {
                   "schema": {
-                    "$ref": "#/components/schemas/Claim"
+                    "$ref": "#/components/schemas/ClaimWithDetails"
                   }
                 }
               }
@@ -919,7 +1005,7 @@
             "customer-claims"
           ],
           "summary": "Get Claim",
-          "description": "Get specific claim details",
+          "description": "Get specific claim details with attachments",
           "operationId": "get_claim_customer_claims__claim_id__get",
           "security": [
             {
@@ -1733,7 +1819,7 @@
             "admin-claims"
           ],
           "summary": "Get All Claims",
-          "description": "Get all claims with optional filters",
+          "description": "Get all claims with optional filters and attachments",
           "operationId": "get_all_claims_admin_claims__get",
           "security": [
             {
@@ -1828,7 +1914,7 @@
             "admin-claims"
           ],
           "summary": "Get Claims Requiring Manual Review",
-          "description": "Get claims that require manual review",
+          "description": "Get claims that require manual review with attachments",
           "operationId": "get_claims_requiring_manual_review_admin_claims_manual_review_get",
           "responses": {
             "200": {
@@ -1859,7 +1945,7 @@
             "admin-claims"
           ],
           "summary": "Get Claim",
-          "description": "Get specific claim details",
+          "description": "Get specific claim details with attachments",
           "operationId": "get_claim_admin_claims__claim_id__get",
           "security": [
             {
@@ -2607,6 +2693,53 @@
     },
     "components": {
       "schemas": {
+        "BatchRiskAssessmentRequest": {
+          "properties": {
+            "products": {
+              "items": {
+                "$ref": "#/components/schemas/ProductRiskRequest"
+              },
+              "type": "array",
+              "minItems": 1,
+              "title": "Products",
+              "description": "List of products to assess"
+            }
+          },
+          "type": "object",
+          "required": [
+            "products"
+          ],
+          "title": "BatchRiskAssessmentRequest",
+          "description": "Batch risk assessment request"
+        },
+        "BatchRiskAssessmentResponse": {
+          "properties": {
+            "predictions": {
+              "items": {
+                "$ref": "#/components/schemas/ProductRiskResponse"
+              },
+              "type": "array",
+              "title": "Predictions"
+            },
+            "total_products": {
+              "type": "integer",
+              "title": "Total Products"
+            },
+            "high_risk_count": {
+              "type": "integer",
+              "title": "High Risk Count",
+              "description": "Number of products with shortage_probability \u003E 0.5"
+            }
+          },
+          "type": "object",
+          "required": [
+            "predictions",
+            "total_products",
+            "high_risk_count"
+          ],
+          "title": "BatchRiskAssessmentResponse",
+          "description": "Batch risk assessment response"
+        },
         "Cart": {
           "properties": {
             "cart_id": {
@@ -2759,6 +2892,27 @@
             "priority"
           ],
           "title": "CartItemSubstituteCreate"
+        },
+        "Category": {
+          "properties": {
+            "category": {
+              "type": "string",
+              "title": "Category"
+            },
+            "sub_categories": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "title": "Sub Categories"
+            }
+          },
+          "type": "object",
+          "required": [
+            "category",
+            "sub_categories"
+          ],
+          "title": "Category"
         },
         "Claim": {
           "properties": {
@@ -4344,6 +4498,42 @@
           ],
           "title": "OrderWithDetails"
         },
+        "PaginatedResponse_Product_": {
+          "properties": {
+            "items": {
+              "items": {
+                "$ref": "#/components/schemas/Product"
+              },
+              "type": "array",
+              "title": "Items"
+            },
+            "total": {
+              "type": "integer",
+              "title": "Total"
+            },
+            "skip": {
+              "type": "integer",
+              "title": "Skip"
+            },
+            "limit": {
+              "type": "integer",
+              "title": "Limit"
+            },
+            "has_more": {
+              "type": "boolean",
+              "title": "Has More"
+            }
+          },
+          "type": "object",
+          "required": [
+            "items",
+            "total",
+            "skip",
+            "limit",
+            "has_more"
+          ],
+          "title": "PaginatedResponse[Product]"
+        },
         "PriorityLevel": {
           "type": "string",
           "enum": [
@@ -4358,6 +4548,50 @@
             "product_name": {
               "type": "string",
               "title": "Product Name"
+            },
+            "gtin": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Gtin"
+            },
+            "product_name_en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Product Name En"
+            },
+            "product_name_fi": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Product Name Fi"
+            },
+            "category_code": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category Code"
             },
             "category": {
               "anyOf": [
@@ -4381,6 +4615,39 @@
               ],
               "title": "Sub Category"
             },
+            "vendor_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Vendor Name"
+            },
+            "country_of_origin": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country Of Origin"
+            },
+            "temperature_condition": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Temperature Condition"
+            },
             "temperature_zone": {
               "anyOf": [
                 {
@@ -4391,6 +4658,160 @@
                 }
               ],
               "title": "Temperature Zone"
+            },
+            "sales_unit": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sales Unit"
+            },
+            "base_unit": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Base Unit"
+            },
+            "allowed_lot_size": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Allowed Lot Size"
+            },
+            "marketing_text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Marketing Text"
+            },
+            "ingredients": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ingredients"
+            },
+            "storage_instructions": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Storage Instructions"
+            },
+            "allergens": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Allergens"
+            },
+            "labels": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Labels"
+            },
+            "energy_kj": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Energy Kj"
+            },
+            "protein": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Protein"
+            },
+            "carbohydrates": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Carbohydrates"
+            },
+            "fat": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fat"
+            },
+            "sugar": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sugar"
+            },
+            "salt": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Salt"
             },
             "shelf_life_days": {
               "anyOf": [
@@ -4466,6 +4887,50 @@
               "type": "string",
               "title": "Product Name"
             },
+            "gtin": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Gtin"
+            },
+            "product_name_en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Product Name En"
+            },
+            "product_name_fi": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Product Name Fi"
+            },
+            "category_code": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category Code"
+            },
             "category": {
               "anyOf": [
                 {
@@ -4488,6 +4953,39 @@
               ],
               "title": "Sub Category"
             },
+            "vendor_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Vendor Name"
+            },
+            "country_of_origin": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country Of Origin"
+            },
+            "temperature_condition": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Temperature Condition"
+            },
             "temperature_zone": {
               "anyOf": [
                 {
@@ -4498,6 +4996,160 @@
                 }
               ],
               "title": "Temperature Zone"
+            },
+            "sales_unit": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sales Unit"
+            },
+            "base_unit": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Base Unit"
+            },
+            "allowed_lot_size": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Allowed Lot Size"
+            },
+            "marketing_text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Marketing Text"
+            },
+            "ingredients": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ingredients"
+            },
+            "storage_instructions": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Storage Instructions"
+            },
+            "allergens": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Allergens"
+            },
+            "labels": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Labels"
+            },
+            "energy_kj": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Energy Kj"
+            },
+            "protein": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Protein"
+            },
+            "carbohydrates": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Carbohydrates"
+            },
+            "fat": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fat"
+            },
+            "sugar": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sugar"
+            },
+            "salt": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Salt"
             },
             "shelf_life_days": {
               "anyOf": [
@@ -4556,6 +5208,50 @@
               "type": "string",
               "title": "Product Name"
             },
+            "gtin": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Gtin"
+            },
+            "product_name_en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Product Name En"
+            },
+            "product_name_fi": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Product Name Fi"
+            },
+            "category_code": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category Code"
+            },
             "category": {
               "anyOf": [
                 {
@@ -4578,6 +5274,39 @@
               ],
               "title": "Sub Category"
             },
+            "vendor_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Vendor Name"
+            },
+            "country_of_origin": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Country Of Origin"
+            },
+            "temperature_condition": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Temperature Condition"
+            },
             "temperature_zone": {
               "anyOf": [
                 {
@@ -4588,6 +5317,160 @@
                 }
               ],
               "title": "Temperature Zone"
+            },
+            "sales_unit": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sales Unit"
+            },
+            "base_unit": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Base Unit"
+            },
+            "allowed_lot_size": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Allowed Lot Size"
+            },
+            "marketing_text": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Marketing Text"
+            },
+            "ingredients": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ingredients"
+            },
+            "storage_instructions": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Storage Instructions"
+            },
+            "allergens": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Allergens"
+            },
+            "labels": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Labels"
+            },
+            "energy_kj": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Energy Kj"
+            },
+            "protein": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Protein"
+            },
+            "carbohydrates": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Carbohydrates"
+            },
+            "fat": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fat"
+            },
+            "sugar": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sugar"
+            },
+            "salt": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Salt"
             },
             "shelf_life_days": {
               "anyOf": [
@@ -4644,6 +5527,61 @@
             "product_code"
           ],
           "title": "ProductCreate"
+        },
+        "ProductRiskRequest": {
+          "properties": {
+            "product_code": {
+              "type": "string",
+              "title": "Product Code"
+            },
+            "order_qty": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "title": "Order Qty",
+              "description": "Order quantity (must be \u003E 0)"
+            },
+            "order_created_date": {
+              "type": "string",
+              "title": "Order Created Date",
+              "description": "Order creation date (YYYY-MM-DD)"
+            },
+            "requested_delivery_date": {
+              "type": "string",
+              "title": "Requested Delivery Date",
+              "description": "Requested delivery date (YYYY-MM-DD)"
+            }
+          },
+          "type": "object",
+          "required": [
+            "product_code",
+            "order_qty",
+            "order_created_date",
+            "requested_delivery_date"
+          ],
+          "title": "ProductRiskRequest",
+          "description": "Single product risk assessment request"
+        },
+        "ProductRiskResponse": {
+          "properties": {
+            "product_code": {
+              "type": "string",
+              "title": "Product Code"
+            },
+            "shortage_probability": {
+              "type": "number",
+              "maximum": 1,
+              "minimum": 0,
+              "title": "Shortage Probability",
+              "description": "Risk probability (0-1)"
+            }
+          },
+          "type": "object",
+          "required": [
+            "product_code",
+            "shortage_probability"
+          ],
+          "title": "ProductRiskResponse",
+          "description": "Single product risk assessment response"
         },
         "ResolutionType": {
           "type": "string",

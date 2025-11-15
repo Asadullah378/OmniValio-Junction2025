@@ -121,41 +121,68 @@ def approve_claim(
     
     # Calculate refund amount if not provided
     if refund_amount is None:
-        # Calculate from order
-        order = db.query(models.Order).filter(
+        # Calculate from order with proper eager loading
+        from sqlalchemy.orm import joinedload
+        order = db.query(models.Order).options(
+            joinedload(models.Order.order_lines).joinedload(models.OrderLine.product)
+        ).filter(
             models.Order.order_id == claim.order_id
         ).first()
         if order:
             # Simple calculation - can be enhanced
             refund_amount = sum(
-                line.ordered_qty * line.product.price 
-                for line in order.order_lines 
-                if line.product
+                line.ordered_qty * (line.product.price if line.product and line.product.price else 0)
+                for line in order.order_lines
             ) * 0.1  # 10% default
+            
+            # Ensure minimum refund amount
+            if refund_amount < 1.0:
+                refund_amount = 1.0
+        else:
+            # Default minimum refund if order not found
+            refund_amount = 1.0
     
     claim.credit_amount = refund_amount
     
-    # Create refund invoice
-    invoice = models.Invoice(
-        invoice_id=f"INV-{uuid.uuid4().hex[:8].upper()}",
-        claim_id=claim_id,
-        customer_id=claim.customer_id,
-        invoice_type=models.InvoiceType.REFUND,
-        status=models.InvoiceStatus.PENDING,
-        total_amount=refund_amount,
-        tax_amount=0.0,
-        notes=f"Refund for approved claim {claim_id}"
-    )
-    db.add(invoice)
+    # Check if refund invoice already exists for this claim
+    existing_invoice = db.query(models.Invoice).filter(
+        models.Invoice.claim_id == claim_id,
+        models.Invoice.invoice_type == models.InvoiceType.REFUND
+    ).first()
     
-    invoice_item = models.InvoiceItem(
-        invoice_id=invoice.invoice_id,
-        description=f"Refund for claim: {claim.claim_type}",
-        quantity=1,
-        unit_price=refund_amount,
-        total_price=refund_amount
-    )
-    db.add(invoice_item)
+    if not existing_invoice:
+        # Create refund invoice
+        invoice = models.Invoice(
+            invoice_id=f"INV-{uuid.uuid4().hex[:8].upper()}",
+            claim_id=claim_id,
+            customer_id=claim.customer_id,
+            invoice_type=models.InvoiceType.REFUND,
+            status=models.InvoiceStatus.PENDING,
+            total_amount=refund_amount,
+            tax_amount=0.0,
+            notes=f"Refund for approved claim {claim_id}"
+        )
+        db.add(invoice)
+        
+        invoice_item = models.InvoiceItem(
+            invoice_id=invoice.invoice_id,
+            description=f"Refund for claim: {claim.claim_type.value}",
+            quantity=1,
+            unit_price=refund_amount,
+            total_price=refund_amount
+        )
+        db.add(invoice_item)
+    else:
+        # Update existing invoice amount if different
+        if existing_invoice.total_amount != refund_amount:
+            existing_invoice.total_amount = refund_amount
+            # Update invoice item
+            invoice_item = db.query(models.InvoiceItem).filter(
+                models.InvoiceItem.invoice_id == existing_invoice.invoice_id
+            ).first()
+            if invoice_item:
+                invoice_item.unit_price = refund_amount
+                invoice_item.total_price = refund_amount
     
     # Send message to customer
     message = models.Message(

@@ -1,0 +1,395 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Shortage Risk Prediction API",
+      "description": "Real-time API for predicting shortage risk on incoming orders",
+      "version": "1.0.0"
+    },
+    "paths": {
+      "/": {
+        "get": {
+          "summary": "Root",
+          "description": "Root endpoint",
+          "operationId": "root__get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "type": "object",
+                    "title": "Response Root  Get"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/health": {
+        "get": {
+          "summary": "Health Check",
+          "description": "Health check endpoint",
+          "operationId": "health_check_health_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HealthResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/predict": {
+        "post": {
+          "summary": "Predict Single",
+          "description": "Predict shortage risk for a single order\n\nReturns the shortage probability and binary flag for the given order.",
+          "operationId": "predict_single_predict_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PredictionResult"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/predict/batch": {
+        "post": {
+          "summary": "Predict Batch",
+          "description": "Predict shortage risk for multiple orders in batch\n\nMore efficient than calling /predict multiple times.\nReturns predictions for all orders with summary statistics.",
+          "operationId": "predict_batch_predict_batch_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchOrderRequest"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/BatchPredictionResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "BatchOrderRequest": {
+          "properties": {
+            "orders": {
+              "items": {
+                "$ref": "#/components/schemas/OrderRequest"
+              },
+              "type": "array",
+              "title": "Orders",
+              "description": "List of orders to predict"
+            }
+          },
+          "type": "object",
+          "required": [
+            "orders"
+          ],
+          "title": "BatchOrderRequest",
+          "description": "Batch of orders for prediction"
+        },
+        "BatchPredictionResponse": {
+          "properties": {
+            "predictions": {
+              "items": {
+                "$ref": "#/components/schemas/PredictionResult"
+              },
+              "type": "array",
+              "title": "Predictions"
+            },
+            "total_orders": {
+              "type": "integer",
+              "title": "Total Orders"
+            },
+            "high_risk_count": {
+              "type": "integer",
+              "title": "High Risk Count",
+              "description": "Number of orders flagged as high risk"
+            }
+          },
+          "type": "object",
+          "required": [
+            "predictions",
+            "total_orders",
+            "high_risk_count"
+          ],
+          "title": "BatchPredictionResponse",
+          "description": "Response containing multiple predictions"
+        },
+        "HTTPValidationError": {
+          "properties": {
+            "detail": {
+              "items": {
+                "$ref": "#/components/schemas/ValidationError"
+              },
+              "type": "array",
+              "title": "Detail"
+            }
+          },
+          "type": "object",
+          "title": "HTTPValidationError"
+        },
+        "HealthResponse": {
+          "properties": {
+            "status": {
+              "type": "string",
+              "title": "Status"
+            },
+            "model_loaded": {
+              "type": "boolean",
+              "title": "Model Loaded"
+            },
+            "feature_store_loaded": {
+              "type": "boolean",
+              "title": "Feature Store Loaded"
+            },
+            "threshold": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Threshold"
+            },
+            "feature_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Feature Count"
+            }
+          },
+          "type": "object",
+          "required": [
+            "status",
+            "model_loaded",
+            "feature_store_loaded"
+          ],
+          "title": "HealthResponse",
+          "description": "Health check response"
+        },
+        "OrderRequest": {
+          "properties": {
+            "product_code": {
+              "type": "string",
+              "title": "Product Code",
+              "description": "Product code/SKU"
+            },
+            "customer_number": {
+              "type": "string",
+              "title": "Customer Number",
+              "description": "Customer identifier"
+            },
+            "plant": {
+              "type": "string",
+              "title": "Plant",
+              "description": "Plant/facility code"
+            },
+            "storage_location": {
+              "type": "string",
+              "title": "Storage Location",
+              "description": "Storage location code"
+            },
+            "order_qty": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "title": "Order Qty",
+              "description": "Order quantity"
+            },
+            "order_created_date": {
+              "type": "string",
+              "title": "Order Created Date",
+              "description": "Order creation date (ISO format: YYYY-MM-DD)"
+            },
+            "requested_delivery_date": {
+              "type": "string",
+              "title": "Requested Delivery Date",
+              "description": "Requested delivery date (ISO format: YYYY-MM-DD)"
+            }
+          },
+          "type": "object",
+          "required": [
+            "product_code",
+            "customer_number",
+            "plant",
+            "storage_location",
+            "order_qty",
+            "order_created_date",
+            "requested_delivery_date"
+          ],
+          "title": "OrderRequest",
+          "description": "Single order for prediction",
+          "example": {
+            "customer_number": "CUST001",
+            "order_created_date": "2025-11-15",
+            "order_qty": 10,
+            "plant": "P01",
+            "product_code": "123456",
+            "requested_delivery_date": "2025-11-17",
+            "storage_location": "WH01"
+          }
+        },
+        "PredictionResult": {
+          "properties": {
+            "product_code": {
+              "type": "string",
+              "title": "Product Code"
+            },
+            "customer_number": {
+              "type": "string",
+              "title": "Customer Number"
+            },
+            "plant": {
+              "type": "string",
+              "title": "Plant"
+            },
+            "storage_location": {
+              "type": "string",
+              "title": "Storage Location"
+            },
+            "order_qty": {
+              "type": "number",
+              "title": "Order Qty"
+            },
+            "order_created_date": {
+              "type": "string",
+              "title": "Order Created Date"
+            },
+            "requested_delivery_date": {
+              "type": "string",
+              "title": "Requested Delivery Date"
+            },
+            "shortage_probability": {
+              "type": "number",
+              "title": "Shortage Probability",
+              "description": "Probability of shortage (0-1)"
+            },
+            "shortage_flag_pred": {
+              "type": "integer",
+              "title": "Shortage Flag Pred",
+              "description": "Binary prediction (0=no shortage, 1=shortage)"
+            },
+            "threshold_used": {
+              "type": "number",
+              "title": "Threshold Used",
+              "description": "Threshold used for binary classification"
+            }
+          },
+          "type": "object",
+          "required": [
+            "product_code",
+            "customer_number",
+            "plant",
+            "storage_location",
+            "order_qty",
+            "order_created_date",
+            "requested_delivery_date",
+            "shortage_probability",
+            "shortage_flag_pred",
+            "threshold_used"
+          ],
+          "title": "PredictionResult",
+          "description": "Single prediction result"
+        },
+        "ValidationError": {
+          "properties": {
+            "loc": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "type": "array",
+              "title": "Location"
+            },
+            "msg": {
+              "type": "string",
+              "title": "Message"
+            },
+            "type": {
+              "type": "string",
+              "title": "Error Type"
+            }
+          },
+          "type": "object",
+          "required": [
+            "loc",
+            "msg",
+            "type"
+          ],
+          "title": "ValidationError"
+        }
+      }
+    }
+  }

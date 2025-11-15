@@ -343,8 +343,9 @@ export default function AdminOrderDetail() {
                       const substitutes = getSubstitutesForLine(line.line_id);
                       const usedSubstitute = getUsedSubstitute(line.line_id);
                       const isReplaced = isLineReplaced(line);
-                      const productName = line.product?.product_name || 'Unknown Product';
-                      const unitPrice = line.product?.price || 0;
+                      const product = line.product;
+                      const productName = product?.product_name || 'Unknown Product';
+                      const unitPrice = product?.price || 0;
                       const lineTotal = unitPrice * line.ordered_qty;
                       const orderChanges = getOrderChangesForLine(line.line_id);
 
@@ -371,14 +372,59 @@ export default function AdminOrderDetail() {
                                 )}
                               </div>
                               
+                              {/* Product Details */}
+                              {product && (
+                                <div className="flex flex-wrap gap-2 mb-3">
+                                  {product.category && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {product.category}
+                                    </Badge>
+                                  )}
+                                  {product.sub_category && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {product.sub_category}
+                                    </Badge>
+                                  )}
+                                  {product.vendor_name && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {product.vendor_name}
+                                    </Badge>
+                                  )}
+                                  {product.temperature_zone && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {product.temperature_zone}
+                                    </Badge>
+                                  )}
+                                  {product.country_of_origin && (
+                                    <Badge variant="outline" className="text-xs">
+                                      {product.country_of_origin}
+                                    </Badge>
+                                  )}
+                                  {product.gtin && (
+                                    <Badge variant="outline" className="text-xs">
+                                      GTIN: {product.gtin}
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
+                              
                               <div className="grid grid-cols-3 gap-4 text-sm">
                                 <div>
                                   <p className="text-muted-foreground">Quantity</p>
-                                  <p className="font-medium">{line.ordered_qty}</p>
+                                  <p className="font-medium">
+                                    {line.ordered_qty}
+                                    {product?.unit_size && product?.unit_type && (
+                                      <span className="text-muted-foreground ml-1">
+                                        ({product.unit_size} {product.unit_type})
+                                      </span>
+                                    )}
+                                  </p>
                                 </div>
                                 <div>
                                   <p className="text-muted-foreground">Unit Price</p>
-                                  <p className="font-medium">€{unitPrice.toFixed(2)}</p>
+                                  <p className="font-medium">
+                                    {unitPrice > 0 ? `€${unitPrice.toFixed(2)}` : 'Price not available'}
+                                  </p>
                                 </div>
                                 <div>
                                   <p className="text-muted-foreground">Line Total</p>
@@ -421,6 +467,20 @@ export default function AdminOrderDetail() {
                                       Price: €{usedSubstitute.substitute_product.price.toFixed(2)}
                                     </p>
                                   )}
+                                  {(usedSubstitute.substitute_product.category || usedSubstitute.substitute_product.vendor_name) && (
+                                    <div className="flex flex-wrap gap-1 mt-2">
+                                      {usedSubstitute.substitute_product.category && (
+                                        <Badge variant="outline" className="text-xs bg-white">
+                                          {usedSubstitute.substitute_product.category}
+                                        </Badge>
+                                      )}
+                                      {usedSubstitute.substitute_product.vendor_name && (
+                                        <Badge variant="outline" className="text-xs bg-white">
+                                          {usedSubstitute.substitute_product.vendor_name}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  )}
                                   {orderChanges.length > 0 && (
                                     <p className="text-xs text-blue-600 mt-1">
                                       Reason: {orderChanges[0].change_reason}
@@ -456,6 +516,16 @@ export default function AdminOrderDetail() {
                                               <span className="text-xs text-purple-600">
                                                 (€{sub.substitute_product.price.toFixed(2)})
                                               </span>
+                                            )}
+                                            {sub.substitute_product?.category && (
+                                              <Badge variant="outline" className="text-xs ml-2 bg-white">
+                                                {sub.substitute_product.category}
+                                              </Badge>
+                                            )}
+                                            {sub.substitute_product?.vendor_name && (
+                                              <Badge variant="outline" className="text-xs ml-1 bg-white">
+                                                {sub.substitute_product.vendor_name}
+                                              </Badge>
                                             )}
                                           </div>
                                           <Button

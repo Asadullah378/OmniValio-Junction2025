@@ -92,7 +92,14 @@ export const customerOrdersApi = {
 
 // Customer Products API
 export const customerProductsApi = {
-  getProducts: async (params?: { search?: string; category?: string; skip?: number; limit?: number }) => {
+  getProducts: async (params?: { 
+    search?: string; 
+    category?: string; 
+    sub_category?: string;
+    temperature_zone?: string;
+    skip?: number; 
+    limit?: number;
+  }) => {
     const response = await api.get('/customer/products/', { params });
     return response.data;
   },
@@ -100,14 +107,25 @@ export const customerProductsApi = {
     const response = await api.get(`/customer/products/${productCode}`);
     return response.data;
   },
-  getProductRisk: async (productCode: string) => {
-    const response = await api.get(`/customer/products/${productCode}/risk`);
+  assessProductsRisk: async (products: Array<{
+    product_code: string;
+    order_qty: number;
+    order_created_date: string; // YYYY-MM-DD
+    requested_delivery_date: string; // YYYY-MM-DD
+  }>) => {
+    const response = await api.post('/customer/products/risk/batch', {
+      products,
+    });
     return response.data;
   },
-  getSimilarProducts: async (productCode: string, limit: number = 10) => {
+  getSimilarProducts: async (productCode: string, limit: number = 5) => {
     const response = await api.get(`/customer/products/${productCode}/similar`, {
       params: { limit },
     });
+    return response.data;
+  },
+  getCategories: async () => {
+    const response = await api.get('/customer/products/categories');
     return response.data;
   },
 };

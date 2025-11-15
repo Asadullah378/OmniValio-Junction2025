@@ -45,9 +45,9 @@ export default function ClaimsList() {
                   <div className="flex items-center gap-3">
                     <h3 className="text-xl font-bold">Claim</h3>
                     <StatusChip type="claim" status={claim.status} />
-                    {claim.processing?.requires_manual_review && (
+                    {/* {claim.processing?.requires_manual_review && (
                       <Badge variant="destructive">Manual Review</Badge>
-                    )}
+                    )} */}
                     {claim.processing?.ai_processed && (
                       <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
                         <Sparkles className="h-3 w-3 mr-1" />

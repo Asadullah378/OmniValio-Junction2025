@@ -57,14 +57,60 @@ def get_substitute_products(
     product_code: str,
     db: Session = Depends(get_db)
 ):
-    """Get potential substitute products (simplified - can be enhanced with ML)"""
+    """Get potential substitute products using AI-based semantic search"""
     product = db.query(models.Product).filter(
         models.Product.product_code == product_code
     ).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     
-    # Simple substitution logic: same category and temperature zone
+    # Try to use AI recommendation service
+    try:
+        from app.AI_Services.product_recommender import get_recommender
+        
+        recommender = get_recommender()
+        if recommender.available:
+            # Build search text from product
+            search_text = recommender.build_search_text(product)
+            
+            # Get recommendations by text (using product embedding)
+            recommended_gtins = recommender.get_recommendations_by_text(search_text, top_k=10)
+            
+            if recommended_gtins:
+                # Find products by GTIN (handle .0 suffix)
+                substitute_products = []
+                for gtin in recommended_gtins:
+                    # Try exact match
+                    db_product = db.query(models.Product).filter(
+                        models.Product.gtin == gtin
+                    ).first()
+                    
+                    # Try with .0 suffix
+                    if not db_product and gtin.endswith('.0'):
+                        gtin_clean = gtin[:-2]
+                        db_product = db.query(models.Product).filter(
+                            models.Product.gtin == gtin_clean
+                        ).first()
+                    
+                    # Try without .0 if it doesn't have it
+                    if not db_product and not gtin.endswith('.0'):
+                        gtin_with_suffix = f"{gtin}.0"
+                        db_product = db.query(models.Product).filter(
+                            models.Product.gtin == gtin_with_suffix
+                        ).first()
+                    
+                    if db_product and db_product.product_code != product_code:
+                        substitute_products.append(db_product)
+                        if len(substitute_products) >= 10:
+                            break
+                
+                if substitute_products:
+                    return substitute_products
+    except Exception as e:
+        # Fall back to simple logic if AI service fails
+        print(f"AI recommendation service error: {e}")
+    
+    # Fallback: Simple substitution logic: same category and temperature zone
     substitutes = db.query(models.Product).filter(
         models.Product.product_code != product_code,
         models.Product.category == product.category,

@@ -123,14 +123,35 @@ class Product(Base):
     __tablename__ = "products"
 
     product_code = Column(String, primary_key=True, index=True)
-    product_name = Column(String, nullable=False)
-    category = Column(String)
-    sub_category = Column(String)
-    temperature_zone = Column(String)  # ambient, chilled, frozen
-    shelf_life_days = Column(Integer)
-    unit_size = Column(String)
-    unit_type = Column(String)
-    price = Column(Float)
+    gtin = Column(String, nullable=True)
+    product_name = Column(String, nullable=False)  # Will use product_name_en as primary
+    product_name_en = Column(String, nullable=True)
+    product_name_fi = Column(String, nullable=True)
+    category_code = Column(String, nullable=True)  # Numeric category code from CSV
+    category = Column(String, nullable=True)  # category_name from CSV
+    sub_category = Column(String, nullable=True)  # subcategory_name from CSV
+    vendor_name = Column(String, nullable=True)
+    country_of_origin = Column(String, nullable=True)
+    temperature_condition = Column(Float, nullable=True)  # Numeric temperature condition
+    temperature_zone = Column(String, nullable=True)  # Derived from temperature_condition
+    sales_unit = Column(String, nullable=True)
+    base_unit = Column(String, nullable=True)
+    allowed_lot_size = Column(Float, nullable=True)
+    marketing_text = Column(Text, nullable=True)
+    ingredients = Column(Text, nullable=True)
+    storage_instructions = Column(Text, nullable=True)
+    allergens = Column(Text, nullable=True)
+    labels = Column(Text, nullable=True)
+    energy_kj = Column(Float, nullable=True)
+    protein = Column(Float, nullable=True)
+    carbohydrates = Column(Float, nullable=True)
+    fat = Column(Float, nullable=True)
+    sugar = Column(Float, nullable=True)
+    salt = Column(Float, nullable=True)
+    shelf_life_days = Column(Integer, nullable=True)
+    unit_size = Column(String, nullable=True)
+    unit_type = Column(String, nullable=True)
+    price = Column(Float, nullable=True)
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 

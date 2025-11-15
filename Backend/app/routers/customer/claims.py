@@ -22,13 +22,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 def process_claim_ai(claim_id: str):
-    """Background task to process claim with AI (dummy implementation)"""
-    import time
-    
-    # Simulate AI processing time (2-5 seconds)
-    processing_time = random.uniform(2.0, 5.0)
-    time.sleep(processing_time)
-    
+    """Background task to process claim with AI using OpenAI Vision API"""
     # Get database session
     db = SessionLocal()
     try:
@@ -38,6 +32,7 @@ def process_claim_ai(claim_id: str):
         ).first()
         
         if not claim:
+            print(f"Claim {claim_id} not found for AI processing")
             return
         
         processing = db.query(models.ClaimProcessing).filter(
@@ -45,65 +40,116 @@ def process_claim_ai(claim_id: str):
         ).first()
         
         if not processing:
+            print(f"ClaimProcessing record not found for claim {claim_id}")
             return
         
-        # Generate AI result (dummy implementation)
-        # In real implementation, this would call ML model
-        ai_confidence = round(random.uniform(0.6, 0.95), 2)
+        # Call AI claim processor
+        from app.AI_Services.claim_processor import process_claim
         
-        # Generate AI decision (weighted towards manual review for demo)
-        decision_weights = {
-            "approved": 0.2,
-            "rejected": 0.2,
-            "manual_review_needed": 0.6
-        }
-        ai_decision = random.choices(
-            list(decision_weights.keys()),
-            weights=list(decision_weights.values())
-        )[0]
+        ai_result = process_claim(claim_id)
         
-        # Generate AI summary based on claim type
-        claim_type_summaries = {
-            models.ClaimType.MISSING_ITEM: "AI analysis indicates missing items based on order comparison. Images show incomplete delivery.",
-            models.ClaimType.DAMAGED_ITEM: "AI analysis detected potential damage in uploaded images. Product condition assessment required.",
-            models.ClaimType.WRONG_ITEM: "AI analysis suggests incorrect product was delivered. Product code mismatch detected.",
-            models.ClaimType.QUALITY_ISSUE: "AI analysis indicates potential quality concerns. Visual inspection of images shows anomalies."
-        }
-        
-        ai_summary = claim_type_summaries.get(
-            claim.claim_type,
-            "AI analysis completed. Review of claim details and attachments indicates need for further assessment."
-        )
-        
-        # Create AI result as JSON
-        ai_result = {
-            "summary": ai_summary,
-            "decision": ai_decision
-        }
-        
-        # Update processing record
-        processing.ai_processed = True
-        processing.ai_confidence = ai_confidence
-        processing.ai_result = json.dumps(ai_result)
-        
-        # Set requires_manual_review based on decision
-        if ai_decision == "manual_review_needed":
+        if not ai_result:
+            print(f"AI processing failed for claim {claim_id}")
+            # Set to manual review if AI fails
             processing.requires_manual_review = True
             claim.status = models.ClaimStatus.MANUAL_REVIEW
-        elif ai_decision == "approved":
+            processing.ai_processed = True
+            processing.ai_confidence = 0.0
+            processing.ai_result = json.dumps({
+                "summary": "AI processing encountered an error. Claim requires manual review.",
+                "decision": "manual_review_needed"
+            })
+            db.commit()
+            return
+        
+        # Update processing record with AI results
+        processing.ai_processed = True
+        processing.ai_confidence = ai_result.confidence
+        processing.ai_result = json.dumps({
+            "summary": ai_result.summary,
+            "decision": ai_result.decision
+        })
+        
+        # Set requires_manual_review based on decision
+        if ai_result.decision == "manual_review_needed":
+            processing.requires_manual_review = True
+            claim.status = models.ClaimStatus.MANUAL_REVIEW
+        elif ai_result.decision == "approved":
             processing.requires_manual_review = False
             claim.status = models.ClaimStatus.APPROVED
             claim.handled_by = "AI_AGENT"
-        elif ai_decision == "rejected":
+            
+            # Check if refund invoice already exists for this claim
+            existing_invoice = db.query(models.Invoice).filter(
+                models.Invoice.claim_id == claim_id,
+                models.Invoice.invoice_type == models.InvoiceType.REFUND
+            ).first()
+            
+            if not existing_invoice:
+                # Calculate refund amount
+                from sqlalchemy.orm import joinedload
+                order = db.query(models.Order).options(
+                    joinedload(models.Order.order_lines).joinedload(models.OrderLine.product)
+                ).filter(
+                    models.Order.order_id == claim.order_id
+                ).first()
+                
+                if order:
+                    # Calculate refund amount based on order value
+                    # Simple calculation: 10% of order total, or can be enhanced
+                    refund_amount = sum(
+                        line.ordered_qty * (line.product.price if line.product and line.product.price else 0)
+                        for line in order.order_lines
+                    ) * 0.1  # 10% default refund
+                    
+                    # Ensure minimum refund amount
+                    if refund_amount < 1.0:
+                        refund_amount = 1.0
+                else:
+                    # Default minimum refund if order not found
+                    refund_amount = 1.0
+                
+                claim.credit_amount = refund_amount
+                
+                # Create refund invoice
+                invoice = models.Invoice(
+                    invoice_id=f"INV-{uuid.uuid4().hex[:8].upper()}",
+                    claim_id=claim_id,
+                    customer_id=claim.customer_id,
+                    invoice_type=models.InvoiceType.REFUND,
+                    status=models.InvoiceStatus.PENDING,
+                    total_amount=refund_amount,
+                    tax_amount=0.0,
+                    notes=f"Refund for AI-approved claim {claim_id}"
+                )
+                db.add(invoice)
+                
+                invoice_item = models.InvoiceItem(
+                    invoice_id=invoice.invoice_id,
+                    description=f"Refund for claim: {claim.claim_type.value}",
+                    quantity=1,
+                    unit_price=refund_amount,
+                    total_price=refund_amount
+                )
+                db.add(invoice_item)
+                
+                # Update message to include refund information
+                message_content = f"AI processing complete. Decision: Approved. Confidence: {ai_result.confidence:.0%}.\n\n{ai_result.summary}\n\nA refund of €{refund_amount:.2f} has been issued and will be processed shortly."
+            else:
+                # Invoice already exists, just update message
+                refund_amount = existing_invoice.total_amount
+                message_content = f"AI processing complete. Decision: Approved. Confidence: {ai_result.confidence:.0%}.\n\n{ai_result.summary}\n\nA refund of €{refund_amount:.2f} has already been issued."
+        elif ai_result.decision == "rejected":
             processing.requires_manual_review = False
             claim.status = models.ClaimStatus.REJECTED
             claim.handled_by = "AI_AGENT"
-            claim.rejection_reason = "AI analysis determined claim does not meet approval criteria."
-        
-        # Send AI processing complete message
-        message_content = f"AI processing complete. Decision: {ai_decision.replace('_', ' ').title()}. Confidence: {ai_confidence:.0%}."
-        if ai_decision == "manual_review_needed":
-            message_content += " Your claim has been flagged for manual review by our team."
+            claim.rejection_reason = ai_result.summary  # Use AI summary as rejection reason
+            message_content = f"AI processing complete. Decision: Rejected. Confidence: {ai_result.confidence:.0%}.\n\n{ai_result.summary}"
+        else:
+            # Default message for manual review
+            message_content = f"AI processing complete. Decision: {ai_result.decision.replace('_', ' ').title()}. Confidence: {ai_result.confidence:.0%}.\n\n{ai_result.summary}"
+            if ai_result.decision == "manual_review_needed":
+                message_content += "\n\nYour claim has been flagged for manual review by our team."
         
         message = models.Message(
             claim_id=claim_id,
@@ -114,10 +160,13 @@ def process_claim_ai(claim_id: str):
         db.add(message)
         
         db.commit()
+        print(f"Successfully processed claim {claim_id} with AI. Decision: {ai_result.decision}, Confidence: {ai_result.confidence:.2f}")
         
     except Exception as e:
         db.rollback()
         print(f"Error processing claim AI: {e}")
+        import traceback
+        traceback.print_exc()
     finally:
         db.close()
 

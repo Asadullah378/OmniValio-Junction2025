@@ -81,15 +81,49 @@ export interface Message {
 export interface Product {
   product_code: string;
   product_name: string;
+  gtin?: string | null;
+  product_name_en?: string | null;
+  product_name_fi?: string | null;
+  category_code?: string | null;
   category?: string | null;
   sub_category?: string | null;
+  vendor_name?: string | null;
+  country_of_origin?: string | null;
+  temperature_condition?: number | null;
   temperature_zone?: string | null;
+  sales_unit?: string | null;
+  base_unit?: string | null;
+  allowed_lot_size?: number | null;
+  marketing_text?: string | null;
+  ingredients?: string | null;
+  storage_instructions?: string | null;
+  allergens?: string | null;
+  labels?: string | null;
+  energy_kj?: number | null;
+  protein?: number | null;
+  carbohydrates?: number | null;
+  fat?: number | null;
+  sugar?: number | null;
+  salt?: number | null;
   shelf_life_days?: number | null;
   unit_size?: string | null;
   unit_type?: string | null;
   price?: number | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  skip: number;
+  limit: number;
+  has_more: boolean;
+}
+
+export interface Category {
+  category: string;
+  sub_categories: string[];
 }
 
 export interface CartItem {
