@@ -39,7 +39,7 @@ try:
     # Create customer user
     customer_user = models.User(
         user_id="USER-001",
-        username="unicafe-kumpula",
+        username="unicafe",
         email="customer1@test.fi",
         hashed_password=get_password_hash("customer123"),
         role=UserRole.CUSTOMER,

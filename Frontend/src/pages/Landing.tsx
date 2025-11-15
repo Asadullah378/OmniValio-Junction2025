@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { useToast } from '@/hooks/use-toast';
 import { 
   Sparkles, 
   Shield, 
@@ -27,6 +28,7 @@ import { cn } from '@/lib/utils';
 
 export default function Landing() {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -53,9 +55,23 @@ export default function Landing() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Form submitted:', formData);
-    // You can add API call here
+    
+    // Reset form fields
+    setFormData({
+      name: '',
+      company: '',
+      email: '',
+      message: ''
+    });
+    
+    // Show success toast
+    toast({
+      title: 'Request submitted successfully!',
+      description: 'We\'ll get back to you soon to schedule your demo.',
+    });
+    
+    // You can add API call here if needed
+    // console.log('Form submitted:', formData);
   };
 
   return (
@@ -127,7 +143,7 @@ export default function Landing() {
                   navigate('/login');
                   setMobileMenuOpen(false);
                 }}
-                className="hidden sm:inline-flex text-gray-700 hover:text-blue-600"
+                className="hidden sm:inline-flex text-gray-700 hover:text-gray-900 hover:bg-gray-100"
               >
                 Login
               </Button>
@@ -208,7 +224,7 @@ export default function Landing() {
                   navigate('/login');
                   setMobileMenuOpen(false);
                 }}
-                className="w-full text-gray-700 hover:text-blue-600 hover:bg-gray-50"
+                className="w-full text-gray-700 hover:text-gray-900 hover:bg-gray-100"
               >
                 Login
               </Button>
@@ -693,23 +709,13 @@ export default function Landing() {
                   className="w-full"
                 />
               </div>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button 
-                  type="submit"
-                  size="lg"
-                  className="bg-blue-600 hover:bg-blue-700 text-white flex-1"
-                >
-                  Request Demo
-                </Button>
-                <Button 
-                  type="button"
-                  size="lg"
-                  variant="outline"
-                  className="flex-1"
-                >
-                  Get the Technical Overview
-                </Button>
-              </div>
+              <Button 
+                type="submit"
+                size="lg"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                Request Demo
+              </Button>
             </form>
           </Card>
         </div>
