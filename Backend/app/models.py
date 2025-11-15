@@ -27,11 +27,17 @@ class Language(str, enum.Enum):
     EN = "en"
 
 
+class UserRole(str, enum.Enum):
+    ADMIN = "admin"
+    CUSTOMER = "customer"
+
+
 class OrderStatus(str, enum.Enum):
-    CREATED = "created"
-    RISK_SCORED = "risk_scored"
+    PLACED = "placed"
+    UNDER_RISK = "under_risk"
+    WAITING_FOR_CUSTOMER_ACTION = "waiting_for_customer_action"
     PICKING = "picking"
-    SHIPPED = "shipped"
+    DELIVERING = "delivering"
     DELIVERED = "delivered"
     CANCELLED = "cancelled"
 
@@ -47,12 +53,35 @@ class ClaimType(str, enum.Enum):
     MISSING_ITEM = "MISSING_ITEM"
     DAMAGED_ITEM = "DAMAGED_ITEM"
     WRONG_ITEM = "WRONG_ITEM"
+    QUALITY_ISSUE = "QUALITY_ISSUE"
 
 
 class ClaimStatus(str, enum.Enum):
     OPEN = "open"
-    IN_REVIEW = "in_review"
+    AI_PROCESSING = "ai_processing"
+    MANUAL_REVIEW = "manual_review"
+    APPROVED = "approved"
+    REJECTED = "rejected"
     RESOLVED = "resolved"
+
+
+class InvoiceType(str, enum.Enum):
+    ORDER = "order"
+    REFUND = "refund"
+    MODIFICATION = "modification"
+
+
+class InvoiceStatus(str, enum.Enum):
+    PENDING = "pending"
+    PAID = "paid"
+    REFUNDED = "refunded"
+    CANCELLED = "cancelled"
+
+
+class MessageSenderType(str, enum.Enum):
+    CUSTOMER = "customer"
+    ADMIN = "admin"
+    AI = "ai"
 
 
 class ResolutionType(str, enum.Enum):
@@ -86,6 +115,8 @@ class Customer(Base):
     orders = relationship("Order", back_populates="customer")
     claims = relationship("Claim", back_populates="customer")
     contact_sessions = relationship("ContactSession", back_populates="customer")
+    cart = relationship("Cart", back_populates="customer", uselist=False)
+    invoices = relationship("Invoice", back_populates="customer")
 
 
 class Product(Base):
@@ -128,7 +159,7 @@ class Order(Base):
     delivery_date = Column(String, nullable=False)  # YYYY-MM-DD
     delivery_window_start = Column(String)  # HH:MM
     delivery_window_end = Column(String)  # HH:MM
-    status = Column(SQLEnum(OrderStatus), default=OrderStatus.CREATED)
+    status = Column(SQLEnum(OrderStatus), default=OrderStatus.PLACED)
     channel = Column(String, default="web")  # web, phone, sales_rep
     overall_order_risk = Column(Float)  # 0-1 risk score
     created_at = Column(DateTime, default=func.now())
@@ -138,6 +169,10 @@ class Order(Base):
     customer = relationship("Customer", back_populates="orders")
     order_lines = relationship("OrderLine", back_populates="order", cascade="all, delete-orphan")
     claims = relationship("Claim", back_populates="order")
+    order_substitutes = relationship("OrderSubstitute", back_populates="order", cascade="all, delete-orphan")
+    tracking_history = relationship("OrderTracking", back_populates="order", cascade="all, delete-orphan")
+    messages = relationship("Message", back_populates="order", cascade="all, delete-orphan")
+    invoices = relationship("Invoice", back_populates="order")
 
 
 class OrderLine(Base):
@@ -214,6 +249,7 @@ class Claim(Base):
     credit_amount = Column(Float)
     re_delivery_date = Column(String)
     handled_by = Column(String)  # AI_AGENT, HUMAN_AGENT
+    rejection_reason = Column(Text)  # Reason for rejection if claim is rejected
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
 
@@ -222,6 +258,9 @@ class Claim(Base):
     customer = relationship("Customer", back_populates="claims")
     claim_lines = relationship("ClaimLine", back_populates="claim", cascade="all, delete-orphan")
     claim_attachments = relationship("ClaimAttachment", back_populates="claim", cascade="all, delete-orphan")
+    messages = relationship("Message", back_populates="claim", cascade="all, delete-orphan")
+    processing = relationship("ClaimProcessing", back_populates="claim", uselist=False)
+    invoices = relationship("Invoice", back_populates="claim")
 
 
 class ClaimLine(Base):
@@ -268,4 +307,193 @@ class ContactSession(Base):
 
     # Relationships
     customer = relationship("Customer", back_populates="contact_sessions")
+
+
+# User Authentication
+class User(Base):
+    __tablename__ = "users"
+
+    user_id = Column(String, primary_key=True, index=True)
+    username = Column(String, unique=True, nullable=False, index=True)
+    email = Column(String, unique=True, nullable=False, index=True)
+    hashed_password = Column(String, nullable=False)
+    role = Column(SQLEnum(UserRole), nullable=False)
+    customer_id = Column(String, ForeignKey("customers.customer_id"), nullable=True)  # Only for customers
+    is_active = Column(Boolean, default=True)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    # Relationships
+    customer = relationship("Customer", foreign_keys=[customer_id])
+
+
+# Cart Management
+class Cart(Base):
+    __tablename__ = "carts"
+
+    cart_id = Column(Integer, primary_key=True, autoincrement=True)
+    customer_id = Column(String, ForeignKey("customers.customer_id"), nullable=False, unique=True)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    # Relationships
+    customer = relationship("Customer", foreign_keys=[customer_id])
+    items = relationship("CartItem", back_populates="cart", cascade="all, delete-orphan")
+
+
+class CartItem(Base):
+    __tablename__ = "cart_items"
+
+    cart_item_id = Column(Integer, primary_key=True, autoincrement=True)
+    cart_id = Column(Integer, ForeignKey("carts.cart_id"), nullable=False)
+    product_code = Column(String, ForeignKey("products.product_code"), nullable=False)
+    quantity = Column(Float, nullable=False)
+    risk_score = Column(Float)  # Dummy for now
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    # Relationships
+    cart = relationship("Cart", back_populates="items")
+    product = relationship("Product")
+    substitutes = relationship("CartItemSubstitute", back_populates="cart_item", cascade="all, delete-orphan")
+
+
+class CartItemSubstitute(Base):
+    __tablename__ = "cart_item_substitutes"
+
+    substitute_id = Column(Integer, primary_key=True, autoincrement=True)
+    cart_item_id = Column(Integer, ForeignKey("cart_items.cart_item_id"), nullable=False)
+    substitute_product_code = Column(String, ForeignKey("products.product_code"), nullable=False)
+    priority = Column(Integer, nullable=False)  # 1 or 2 (max 2 substitutes)
+    created_at = Column(DateTime, default=func.now())
+
+    # Relationships
+    cart_item = relationship("CartItem", back_populates="substitutes")
+    substitute_product = relationship("Product", foreign_keys=[substitute_product_code])
+
+
+# Order Substitutes (customer-selected substitutes linked to order lines)
+class OrderSubstitute(Base):
+    __tablename__ = "order_substitutes"
+
+    substitute_id = Column(Integer, primary_key=True, autoincrement=True)
+    order_id = Column(String, ForeignKey("orders.order_id"), nullable=False)
+    line_id = Column(Integer, ForeignKey("order_lines.line_id"), nullable=False)
+    substitute_product_code = Column(String, ForeignKey("products.product_code"), nullable=False)
+    priority = Column(Integer, nullable=False)  # 1 or 2
+    is_used = Column(Boolean, default=False)  # Whether this substitute was actually used
+    created_at = Column(DateTime, default=func.now())
+
+    # Relationships
+    order = relationship("Order")
+    order_line = relationship("OrderLine")
+    substitute_product = relationship("Product", foreign_keys=[substitute_product_code])
+
+
+# Order Tracking History
+class OrderTracking(Base):
+    __tablename__ = "order_tracking"
+
+    tracking_id = Column(Integer, primary_key=True, autoincrement=True)
+    order_id = Column(String, ForeignKey("orders.order_id"), nullable=False)
+    status = Column(SQLEnum(OrderStatus), nullable=False)
+    updated_by = Column(String)  # admin, ai, system
+    notes = Column(Text)
+    created_at = Column(DateTime, default=func.now())
+
+    # Relationships
+    order = relationship("Order")
+
+
+# Messages for Order/Claim Communication
+class Message(Base):
+    __tablename__ = "messages"
+
+    message_id = Column(Integer, primary_key=True, autoincrement=True)
+    order_id = Column(String, ForeignKey("orders.order_id"), nullable=True)
+    claim_id = Column(String, ForeignKey("claims.claim_id"), nullable=True)
+    sender_type = Column(SQLEnum(MessageSenderType), nullable=False)
+    sender_id = Column(String, nullable=False)  # user_id or "ai" or "admin"
+    content = Column(Text, nullable=False)
+    is_read = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=func.now())
+
+    # Relationships
+    order = relationship("Order")
+    claim = relationship("Claim")
+
+
+# Invoices and Payments
+class Invoice(Base):
+    __tablename__ = "invoices"
+
+    invoice_id = Column(String, primary_key=True, index=True)
+    order_id = Column(String, ForeignKey("orders.order_id"), nullable=True)
+    claim_id = Column(String, ForeignKey("claims.claim_id"), nullable=True)
+    customer_id = Column(String, ForeignKey("customers.customer_id"), nullable=False)
+    invoice_type = Column(SQLEnum(InvoiceType), nullable=False)
+    status = Column(SQLEnum(InvoiceStatus), default=InvoiceStatus.PENDING)
+    total_amount = Column(Float, nullable=False)
+    tax_amount = Column(Float, default=0.0)
+    notes = Column(Text)
+    created_at = Column(DateTime, default=func.now())
+    paid_at = Column(DateTime, nullable=True)
+
+    # Relationships
+    order = relationship("Order")
+    claim = relationship("Claim")
+    customer = relationship("Customer")
+    items = relationship("InvoiceItem", back_populates="invoice", cascade="all, delete-orphan")
+
+
+class InvoiceItem(Base):
+    __tablename__ = "invoice_items"
+
+    item_id = Column(Integer, primary_key=True, autoincrement=True)
+    invoice_id = Column(String, ForeignKey("invoices.invoice_id"), nullable=False)
+    product_code = Column(String, ForeignKey("products.product_code"), nullable=True)
+    description = Column(String, nullable=False)
+    quantity = Column(Float, nullable=False)
+    unit_price = Column(Float, nullable=False)
+    total_price = Column(Float, nullable=False)
+    created_at = Column(DateTime, default=func.now())
+
+    # Relationships
+    invoice = relationship("Invoice", back_populates="items")
+    product = relationship("Product")
+
+
+# Inventory Management
+class Inventory(Base):
+    __tablename__ = "inventory"
+
+    inventory_id = Column(Integer, primary_key=True, autoincrement=True)
+    product_code = Column(String, ForeignKey("products.product_code"), nullable=False, unique=True)
+    quantity = Column(Float, default=0.0, nullable=False)
+    reserved_quantity = Column(Float, default=0.0)  # Reserved for orders
+    available_quantity = Column(Float, default=0.0)  # Calculated: quantity - reserved_quantity
+    last_updated = Column(DateTime, default=func.now(), onupdate=func.now())
+    updated_by = Column(String)  # admin user_id
+
+    # Relationships
+    product = relationship("Product")
+
+
+# Claim Processing Status
+class ClaimProcessing(Base):
+    __tablename__ = "claim_processing"
+
+    processing_id = Column(Integer, primary_key=True, autoincrement=True)
+    claim_id = Column(String, ForeignKey("claims.claim_id"), nullable=False, unique=True)
+    ai_processed = Column(Boolean, default=False)
+    ai_confidence = Column(Float)
+    ai_result = Column(Text)  # AI's assessment
+    requires_manual_review = Column(Boolean, default=False)
+    reviewed_by = Column(String)  # admin user_id
+    reviewed_at = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+
+    # Relationships
+    claim = relationship("Claim")
 

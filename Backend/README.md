@@ -1,16 +1,29 @@
 # Valio Aimo Customer Portal Backend
 
-FastAPI backend for the Zero-Fail Logistics Customer Portal.
+FastAPI backend for the Zero-Fail Logistics Customer Portal with complete customer and admin functionality.
 
 ## Features
 
-- **Customer Management**: Create, read, update customer profiles with preferences
-- **Product Management**: Manage product catalog with substitution capabilities
-- **Order Management**: Full order lifecycle with risk scoring
-- **Pre-Order Optimization**: Suggest alternatives for low-priority items with high risk
-- **Substitution Management**: Handle product substitutions during picking
-- **Claims Management**: Post-delivery claim handling with multimodal support
-- **Dashboard**: Customer and system statistics
+### Customer Features
+- **Authentication**: Login (accounts created by admin)
+- **Dashboard**: View stats, orders in progress, actions needed
+- **Orders**: 
+  - Browse products and add to cart
+  - View product risk evaluation (dummy endpoint)
+  - Select up to 2 substitutes per product
+  - View similar products (dummy endpoint)
+  - Place orders and track status
+  - Order communication chat
+- **Claims**: Create claims for delivered orders with images, track status, chat
+- **Payments**: View invoices, refunds, and order modifications
+
+### Admin Features
+- **Authentication**: Admin login
+- **Order Management**: View all orders, update status, replace products with substitutes
+- **Inventory Management**: Add/remove products, update quantities
+- **Claims Management**: View claims, approve/reject, chat with customers
+- **Customer Management**: Create new customers and user accounts
+- **Communication**: Send messages for orders and claims
 
 ## Tech Stack
 
@@ -18,6 +31,8 @@ FastAPI backend for the Zero-Fail Logistics Customer Portal.
 - **SQLAlchemy**: ORM for database operations
 - **SQLite**: Local database (can be easily switched to PostgreSQL)
 - **Pydantic**: Data validation and serialization
+- **JWT**: Authentication tokens
+- **bcrypt**: Password hashing
 
 ## Installation
 
@@ -31,6 +46,16 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```bash
 pip install -r requirements.txt
 ```
+
+3. Seed sample data (optional):
+```bash
+python seed_data.py
+```
+
+This creates:
+- Admin user: `admin` / `admin123`
+- Customer user: `customer1` / `customer123`
+- Sample products and inventory
 
 ## Running the Server
 
@@ -51,59 +76,118 @@ To reset the database, simply delete `valio_aimo.db` and restart the server.
 
 ## API Endpoints
 
-### Customers
-- `POST /customers/` - Create customer
-- `GET /customers/` - List customers
-- `GET /customers/{customer_id}` - Get customer
-- `PUT /customers/{customer_id}` - Update customer
-- `DELETE /customers/{customer_id}` - Delete customer
+### Authentication
+- `POST /auth/login` - Login (admin or customer)
+- `GET /auth/me` - Get current user info
 
-### Products
-- `POST /products/` - Create product
-- `GET /products/` - List products
-- `GET /products/{product_code}` - Get product
-- `GET /products/{product_code}/substitutes` - Get substitute products
+### Customer Endpoints
 
-### Orders
-- `POST /orders/` - Create order
-- `GET /orders/` - List orders
-- `GET /orders/{order_id}` - Get order
-- `PUT /orders/{order_id}` - Update order
-- `POST /orders/{order_id}/risk-score` - Score order risk
-- `GET /orders/{order_id}/lines` - Get order lines
+#### Cart
+- `GET /customer/cart/` - Get cart
+- `POST /customer/cart/items` - Add item to cart
+- `DELETE /customer/cart/items/{cart_item_id}` - Remove item from cart
+- `DELETE /customer/cart/` - Clear cart
 
-### Substitutions
-- `POST /substitutions/pre-order-optimization/{order_id}` - Get pre-order suggestions
-- `POST /substitutions/suggest` - Create substitution suggestions
-- `POST /substitutions/decide` - Customer decides on substitution
-- `GET /substitutions/{order_id}/suggestions` - Get suggestions for order
+#### Products
+- `GET /customer/products/` - Browse products
+- `GET /customer/products/{product_code}` - Get product details
+- `GET /customer/products/{product_code}/risk` - Get risk evaluation (dummy)
+- `GET /customer/products/{product_code}/similar` - Get similar products (dummy)
 
-### Claims
-- `POST /claims/` - Create claim
-- `GET /claims/` - List claims
-- `GET /claims/{claim_id}` - Get claim
-- `POST /claims/{claim_id}/analyze` - Analyze claim images
-- `POST /claims/{claim_id}/resolve` - Resolve claim
-- `PUT /claims/{claim_id}/status` - Update claim status
+#### Orders
+- `POST /customer/orders/` - Place order from cart
+- `GET /customer/orders/` - Get all orders
+- `GET /customer/orders/{order_id}` - Get order details
+- `GET /customer/orders/{order_id}/messages` - Get order messages
+- `POST /customer/orders/{order_id}/messages` - Send order message
 
-### Dashboard
-- `GET /dashboard/customer/{customer_id}` - Customer dashboard
-- `GET /dashboard/stats/orders` - Order statistics
+#### Dashboard
+- `GET /customer/dashboard/` - Get dashboard
+- `GET /customer/dashboard/actions-needed` - Get orders needing action
+
+#### Claims
+- `POST /customer/claims/` - Create claim (with file uploads)
+- `GET /customer/claims/` - Get all claims
+- `GET /customer/claims/{claim_id}` - Get claim details
+- `GET /customer/claims/{claim_id}/messages` - Get claim messages
+- `POST /customer/claims/{claim_id}/messages` - Send claim message
+
+#### Payments
+- `GET /customer/payments/invoices` - Get all invoices
+- `GET /customer/payments/invoices/{invoice_id}` - Get invoice details
+
+### Admin Endpoints
+
+#### Orders
+- `GET /admin/orders/` - Get all orders
+- `GET /admin/orders/{order_id}` - Get order details
+- `PUT /admin/orders/{order_id}/status` - Update order status
+- `POST /admin/orders/{order_id}/replace-product` - Replace product with substitute
+- `GET /admin/orders/{order_id}/messages` - Get order messages
+- `POST /admin/orders/{order_id}/messages` - Send order message
+
+#### Inventory
+- `GET /admin/inventory/` - Get all inventory
+- `GET /admin/inventory/{product_code}` - Get inventory item
+- `PUT /admin/inventory/{product_code}` - Update inventory
+- `DELETE /admin/inventory/{product_code}` - Remove from inventory
+
+#### Claims
+- `GET /admin/claims/` - Get all claims
+- `GET /admin/claims/manual-review` - Get claims requiring manual review
+- `GET /admin/claims/{claim_id}` - Get claim details
+- `POST /admin/claims/{claim_id}/approve` - Approve claim
+- `POST /admin/claims/{claim_id}/reject` - Reject claim
+- `GET /admin/claims/{claim_id}/messages` - Get claim messages
+- `POST /admin/claims/{claim_id}/messages` - Send claim message
+
+#### Customers
+- `POST /admin/customers/` - Create customer
+- `POST /admin/customers/{customer_id}/user` - Create user for customer
+- `GET /admin/customers/` - Get all customers
+- `GET /admin/customers/{customer_id}` - Get customer
+
+#### Products
+- `POST /admin/products/` - Create product
+- `GET /admin/products/` - Get all products
+- `PUT /admin/products/{product_code}` - Update product
+- `DELETE /admin/products/{product_code}` - Delete product
 
 ## Database Schema
 
 The database includes the following main entities:
 
-- **Customers**: Customer profiles with preferences
+- **Users**: Authentication (admin/customer roles)
+- **Customers**: Customer profiles
 - **Products**: Product catalog
-- **Orders**: Customer orders
-- **OrderLines**: Individual items in orders
-- **SubstitutionSuggestions**: Suggested product alternatives
-- **OrderChanges**: History of order modifications
+- **Inventory**: Product stock levels
+- **Carts & CartItems**: Shopping cart
+- **Orders & OrderLines**: Customer orders
+- **OrderSubstitutes**: Customer-selected substitutes
+- **OrderTracking**: Order status history
+- **Messages**: Order/claim communication
+- **Invoices**: Payments and refunds
 - **Claims**: Post-delivery claims
-- **ClaimLines**: Items in claims
-- **ClaimAttachments**: Images/videos for claims
-- **ContactSessions**: AI interaction logs
+- **ClaimProcessing**: AI/manual claim processing
+
+## Order Status Flow
+
+1. **PLACED** - Order placed by customer
+2. **UNDER_RISK** - AI detected high risk items
+3. **WAITING_FOR_CUSTOMER_ACTION** - Needs customer confirmation
+4. **PICKING** - Being picked in warehouse
+5. **DELIVERING** - Out for delivery
+6. **DELIVERED** - Delivered to customer
+7. **CANCELLED** - Order cancelled
+
+## Claim Status Flow
+
+1. **OPEN** - Claim created
+2. **AI_PROCESSING** - AI analyzing claim
+3. **MANUAL_REVIEW** - Requires admin review
+4. **APPROVED** - Claim approved, refund issued
+5. **REJECTED** - Claim rejected
+6. **RESOLVED** - Claim fully resolved
 
 ## Development
 
@@ -117,24 +201,35 @@ Backend/
 │   ├── database.py          # Database configuration
 │   ├── models.py            # SQLAlchemy models
 │   ├── schemas.py           # Pydantic schemas
+│   ├── auth.py              # Authentication utilities
 │   └── routers/
-│       ├── customers.py
-│       ├── products.py
-│       ├── orders.py
-│       ├── substitutions.py
-│       ├── claims.py
-│       └── dashboard.py
+│       ├── auth.py          # Authentication endpoints
+│       ├── customer/
+│       │   ├── cart.py
+│       │   ├── products.py
+│       │   ├── orders.py
+│       │   ├── dashboard.py
+│       │   ├── claims.py
+│       │   └── payments.py
+│       └── admin/
+│           ├── orders.py
+│           ├── inventory.py
+│           ├── claims.py
+│           ├── customers.py
+│           └── products.py
 ├── requirements.txt
+├── seed_data.py            # Sample data seeding script
 └── README.md
 ```
 
 ## Notes
 
-- Risk scoring is currently a placeholder - integrate with ML model in production
-- Image analysis for claims is a placeholder - integrate with vision model in production
-- Substitution logic is simplified - enhance with ML-based similarity in production
+- Risk evaluation and similar products endpoints are placeholders - integrate with ML models in production
+- Claim AI processing is a placeholder - integrate with vision model in production
+- File uploads for claims are saved to `uploads/claims/` directory
+- JWT secret key should be changed in production (in `app/auth.py`)
+- Default passwords in seed data should be changed in production
 
 ## License
 
 MIT
-

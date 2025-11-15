@@ -1,169 +1,73 @@
-# Omni-Valio Front-End
+# Welcome to your Lovable project
 
-A world-class, Scandinavian-inspired interface designed for chefs, operations managers, and food-service professionals. Built with Next.js, TypeScript, and Tailwind CSS.
+## Project info
 
-## 🎯 Features
+**URL**: https://lovable.dev/projects/417b6634-6855-4318-a812-9b35db87d731
 
-### 1. **Dashboard - "Today at a Glance"**
-- Hero summary card with animated statistics (odometer effect)
-- Real-time delivery tracking with expandable items list
-- Action center with prioritized alerts
-- Risk-aware item displays with visual indicators
+## How can I edit this code?
 
-### 2. **Smart Order Builder**
-- Product catalogue with search and filters
-- Real-time risk awareness for each product
-- Intelligent basket with priority controls
-- AI-powered substitution suggestions
-- Grid and list view modes
+There are several ways of editing your application.
 
-### 3. **Pre-Order Optimization Modal**
-- Full-screen, premium modal experience
-- AI-recommended substitutions with Good/Better/Best tiers
-- Market-basket similarity indicators
-- Critical risk alerts with contact options
-- Smooth animations and transitions
+**Use Lovable**
 
-### 4. **Real-Time Picking Alerts**
-- Live timeline with animated event nodes
-- Detailed alert viewer with product information
-- Voice/chat transcript mockups
-- Quick action buttons for issue resolution
+Simply visit the [Lovable Project](https://lovable.dev/projects/417b6634-6855-4318-a812-9b35db87d731) and start prompting.
 
-### 5. **Claims & Credits**
-- AI-handled claim tracking
-- Evidence viewer with image analysis
-- "See what AI sees" overlay toggle
-- Credit note generation and PDF download
-- Timeline of claim events
+Changes made via Lovable will be committed automatically to this repo.
 
-### 6. **Settings**
-- **Profile:** Restaurant details and language preferences
-- **Communication:** Channel preferences with time slider
-- **Substitution Rules:** Category priorities and allergen restrictions
-- **AI Transparency:** Clear explanations of how AI makes decisions
+**Use your preferred IDE**
 
-## 🚀 Getting Started
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-### Prerequisites
-- Node.js 18+ installed
-- npm or yarn package manager
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-### Installation
+Follow these steps:
 
-```bash
-# Install dependencies
-npm install
+```sh
+# Step 1: Clone the repository using the project's Git URL.
+git clone <YOUR_GIT_URL>
 
-# Run development server
+# Step 2: Navigate to the project directory.
+cd <YOUR_PROJECT_NAME>
+
+# Step 3: Install the necessary dependencies.
+npm i
+
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
-
-# Build for production
-npm run build
-
-# Start production server
-npm start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the application.
+**Edit a file directly in GitHub**
 
-## 🎨 Design System
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-### Color Palette
-- **Valio Blues:** Primary brand colors (50-900)
-- **Glacier Whites:** Neutral tones for backgrounds and text
-- **Risk Colors:** Green (low), Amber (medium), Red (high)
+**Use GitHub Codespaces**
 
-### Typography
-- **Display XL/LG:** Page titles (28-32px)
-- **Heading:** Section titles (24px)
-- **Body:** Regular text (15-16px)
-- **Caption/Label:** Small text (11-12px)
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-### Components
-All components follow Scandinavian design principles:
-- Clean, white-dominant backgrounds
-- Soft shadows and rounded corners
-- Subtle micro-animations
-- Clear visual hierarchy
+## What technologies are used for this project?
 
-## 📁 Project Structure
+This project is built with:
 
-```
-├── app/                    # Next.js 14 app directory
-│   ├── page.tsx           # Dashboard
-│   ├── order/             # Smart Order Builder
-│   ├── alerts/            # Real-Time Picking Alerts
-│   ├── claims/            # Claims & Credits
-│   └── settings/          # Settings
-├── components/            # Reusable components
-│   ├── ui/               # Base UI components
-│   ├── dashboard/        # Dashboard-specific components
-│   ├── order/            # Order-specific components
-│   ├── alerts/           # Alerts-specific components
-│   ├── claims/           # Claims-specific components
-│   └── settings/         # Settings-specific components
-├── lib/                   # Utilities and types
-│   ├── types.ts          # TypeScript type definitions
-│   ├── utils.ts          # Helper functions
-│   └── mockData.ts       # Mock data generators
-└── public/               # Static assets
-```
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-## 🎭 Mock Data
+## How can I deploy this project?
 
-The application is fully functional with comprehensive mock data including:
-- 20+ Products across multiple categories
-- Deliveries with various risk levels
-- Real-time alerts and timeline events
-- Claims with AI analysis
-- User preferences
+Simply open [Lovable](https://lovable.dev/projects/417b6634-6855-4318-a812-9b35db87d731) and click on Share -> Publish.
 
-All mock data is generated in `lib/mockData.ts` and can be easily customized.
+## Can I connect a custom domain to my Lovable project?
 
-## 🛠️ Tech Stack
+Yes, you can!
 
-- **Framework:** Next.js 14 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS 3
-- **Animations:** Framer Motion
-- **UI Components:** Radix UI primitives
-- **Icons:** Lucide React
+To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
 
-## ✨ Micro-Interactions
-
-The application features numerous micro-interactions:
-- Pulsing risk indicators for high-risk items
-- Hover shadows that brighten on cards
-- Smooth slide and scale transitions
-- Odometer-style number animations
-- Live timeline event pulses
-- Modal entrance/exit animations
-
-## 📱 Responsive Design
-
-Fully responsive across all device sizes:
-- Mobile-first approach
-- Adaptive layouts for tablets and desktops
-- Touch-friendly interactive elements
-- Optimized for both portrait and landscape orientations
-
-## 🎪 Demo-Ready Features
-
-- All features work with mock data
-- No backend required for demonstration
-- Realistic data and interactions
-- Professional animations and transitions
-- Production-ready build
-
-## 📄 License
-
-This project is licensed under the ISC License.
-
-## 🤝 Contributing
-
-This is a front-end demonstration project. For production use, integrate with your backend API by replacing mock data calls with actual API endpoints.
-
----
-
-**Built with ❤️ for Omni-Valio**
+Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)

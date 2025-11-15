@@ -6,7 +6,8 @@ from typing import Optional, List
 from datetime import datetime
 from app.models import (
     PriorityLevel, ContactChannel, Language, OrderStatus, 
-    LineStatus, ClaimType, ClaimStatus, ResolutionType, SubstitutionQuality
+    LineStatus, ClaimType, ClaimStatus, ResolutionType, SubstitutionQuality,
+    UserRole, InvoiceType, InvoiceStatus, MessageSenderType
 )
 
 
@@ -90,6 +91,8 @@ class OrderLine(OrderLineBase):
     shortage_ratio: float
     risk_score: Optional[float] = None
     line_status: LineStatus
+    product: Optional[Product] = None  # Product information
+    order_changes: List["OrderChange"] = []  # Track replacements/changes
     created_at: datetime
     updated_at: datetime
 
@@ -108,6 +111,12 @@ class OrderBase(BaseModel):
 class OrderCreate(OrderBase):
     customer_id: str
     lines: List[OrderLineCreate]
+
+
+class OrderPlaceFromCart(BaseModel):
+    delivery_date: str  # YYYY-MM-DD
+    delivery_window_start: Optional[str] = None  # HH:MM
+    delivery_window_end: Optional[str] = None  # HH:MM
 
 
 class OrderUpdate(BaseModel):
@@ -267,6 +276,7 @@ class Claim(BaseModel):
     credit_amount: Optional[float] = None
     re_delivery_date: Optional[str] = None
     handled_by: Optional[str] = None
+    rejection_reason: Optional[str] = None
     created_at: datetime
     updated_at: datetime
     claim_lines: List[ClaimLine] = []
@@ -323,4 +333,218 @@ class CustomerDashboard(BaseModel):
     recent_orders: List[Order]
     open_claims: List[Claim]
     stats: OrderStats
+
+
+# Authentication Schemas
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+    user_id: str
+    role: UserRole
+
+
+class User(BaseModel):
+    user_id: str
+    username: str
+    email: str
+    role: UserRole
+    customer_id: Optional[str] = None
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    password: str
+    role: UserRole
+    customer_id: Optional[str] = None
+
+
+# Cart Schemas
+class CartItemSubstituteCreate(BaseModel):
+    substitute_product_code: str
+    priority: int  # 1 or 2
+
+
+class CartItemCreate(BaseModel):
+    product_code: str
+    quantity: float
+    substitutes: List[CartItemSubstituteCreate] = []  # Max 2
+
+
+class CartItemQuantityUpdate(BaseModel):
+    quantity: float
+
+
+class CartItem(BaseModel):
+    cart_item_id: int
+    product_code: str
+    quantity: float
+    risk_score: Optional[float] = None
+    product: Optional[Product] = None
+    substitutes: List[dict] = []  # Will contain substitute products
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class Cart(BaseModel):
+    cart_id: int
+    customer_id: str
+    items: List[CartItem] = []
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# Order Substitutes
+class OrderSubstitute(BaseModel):
+    substitute_id: int
+    order_id: str
+    line_id: int
+    substitute_product_code: str
+    priority: int
+    is_used: bool
+    substitute_product: Optional[Product] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# Order Tracking
+class OrderTracking(BaseModel):
+    tracking_id: int
+    order_id: str
+    status: OrderStatus
+    updated_by: Optional[str] = None
+    notes: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# Messages
+class MessageCreate(BaseModel):
+    content: str
+    order_id: Optional[str] = None
+    claim_id: Optional[str] = None
+
+
+class Message(BaseModel):
+    message_id: int
+    order_id: Optional[str] = None
+    claim_id: Optional[str] = None
+    sender_type: MessageSenderType
+    sender_id: str
+    content: str
+    is_read: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# Invoices
+class InvoiceItem(BaseModel):
+    item_id: int
+    invoice_id: str
+    product_code: Optional[str] = None
+    description: str
+    quantity: float
+    unit_price: float
+    total_price: float
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class Invoice(BaseModel):
+    invoice_id: str
+    order_id: Optional[str] = None
+    claim_id: Optional[str] = None
+    customer_id: str
+    invoice_type: InvoiceType
+    status: InvoiceStatus
+    total_amount: float
+    tax_amount: float
+    notes: Optional[str] = None
+    created_at: datetime
+    paid_at: Optional[datetime] = None
+    items: List[InvoiceItem] = []
+
+    class Config:
+        from_attributes = True
+
+
+# Inventory
+class InventoryUpdate(BaseModel):
+    quantity: float
+
+
+class Inventory(BaseModel):
+    inventory_id: int
+    product_code: str
+    quantity: float
+    reserved_quantity: float
+    available_quantity: float
+    last_updated: datetime
+    updated_by: Optional[str] = None
+    product: Optional[Product] = None
+
+    class Config:
+        from_attributes = True
+
+
+# Claim Processing
+class ClaimProcessing(BaseModel):
+    processing_id: int
+    claim_id: str
+    ai_processed: bool
+    ai_confidence: Optional[float] = None
+    ai_result: Optional[str] = None
+    requires_manual_review: bool
+    reviewed_by: Optional[str] = None
+    reviewed_at: Optional[datetime] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# Updated Order Schema with new fields
+class OrderWithDetails(Order):
+    order_lines: List[OrderLine] = []
+    order_substitutes: List[OrderSubstitute] = []
+    tracking_history: List[OrderTracking] = []
+    messages: List[Message] = []
+
+    class Config:
+        from_attributes = True
+
+
+# Updated Claim Schema
+class ClaimWithDetails(Claim):
+    claim_lines: List[ClaimLine] = []
+    claim_attachments: List[ClaimAttachment] = []
+    messages: List[Message] = []
+    processing: Optional[ClaimProcessing] = None
+
+    class Config:
+        from_attributes = True
 

@@ -1,0 +1,4808 @@
+{
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Valio Aimo Customer Portal API",
+      "description": "Backend API for Zero-Fail Logistics Customer Portal",
+      "version": "2.0.0"
+    },
+    "paths": {
+      "/auth/login": {
+        "post": {
+          "tags": [
+            "authentication"
+          ],
+          "summary": "Login",
+          "description": "Login endpoint for both admin and customers",
+          "operationId": "login_auth_login_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserLogin"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Token"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/auth/me": {
+        "get": {
+          "tags": [
+            "authentication"
+          ],
+          "summary": "Get Current User Info",
+          "description": "Get current authenticated user information",
+          "operationId": "get_current_user_info_auth_me_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/customer/cart/": {
+        "get": {
+          "tags": [
+            "customer-cart"
+          ],
+          "summary": "Get Cart",
+          "description": "Get customer's cart",
+          "operationId": "get_cart_customer_cart__get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Cart"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        },
+        "delete": {
+          "tags": [
+            "customer-cart"
+          ],
+          "summary": "Clear Cart",
+          "description": "Clear entire cart",
+          "operationId": "clear_cart_customer_cart__delete",
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/customer/cart/items": {
+        "post": {
+          "tags": [
+            "customer-cart"
+          ],
+          "summary": "Add To Cart",
+          "description": "Add item to cart",
+          "operationId": "add_to_cart_customer_cart_items_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartItemCreate"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/customer/cart/items/{cart_item_id}/quantity": {
+        "patch": {
+          "tags": [
+            "customer-cart"
+          ],
+          "summary": "Update Cart Item Quantity",
+          "description": "Update cart item quantity",
+          "operationId": "update_cart_item_quantity_customer_cart_items__cart_item_id__quantity_patch",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "cart_item_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Cart Item Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CartItemQuantityUpdate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customer/cart/items/{cart_item_id}": {
+        "delete": {
+          "tags": [
+            "customer-cart"
+          ],
+          "summary": "Remove From Cart",
+          "description": "Remove item from cart",
+          "operationId": "remove_from_cart_customer_cart_items__cart_item_id__delete",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "cart_item_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Cart Item Id"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customer/products/": {
+        "get": {
+          "tags": [
+            "customer-products"
+          ],
+          "summary": "Browse Products",
+          "description": "Browse products with optional filters",
+          "operationId": "browse_products_customer_products__get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "skip",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 0,
+                "title": "Skip"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 100,
+                "title": "Limit"
+              }
+            },
+            {
+              "name": "category",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Category"
+              }
+            },
+            {
+              "name": "search",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Search"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Product"
+                    },
+                    "title": "Response Browse Products Customer Products  Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customer/products/{product_code}": {
+        "get": {
+          "tags": [
+            "customer-products"
+          ],
+          "summary": "Get Product",
+          "description": "Get product details",
+          "operationId": "get_product_customer_products__product_code__get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "product_code",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Product Code"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customer/products/{product_code}/risk": {
+        "get": {
+          "tags": [
+            "customer-products"
+          ],
+          "summary": "Get Product Risk",
+          "description": "Get product risk evaluation (0-1 range)",
+          "operationId": "get_product_risk_customer_products__product_code__risk_get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "product_code",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Product Code"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customer/products/{product_code}/similar": {
+        "get": {
+          "tags": [
+            "customer-products"
+          ],
+          "summary": "Get Similar Products",
+          "description": "Get similar products (dummy endpoint - will use AI later)",
+          "operationId": "get_similar_products_customer_products__product_code__similar_get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "product_code",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Product Code"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 10,
+                "title": "Limit"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Product"
+                    },
+                    "title": "Response Get Similar Products Customer Products  Product Code  Similar Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customer/orders/": {
+        "get": {
+          "tags": [
+            "customer-orders"
+          ],
+          "summary": "Get Orders",
+          "description": "Get all customer orders with product information",
+          "operationId": "get_orders_customer_orders__get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "items": {
+                      "$ref": "#/components/schemas/OrderWithDetails"
+                    },
+                    "type": "array",
+                    "title": "Response Get Orders Customer Orders  Get"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        },
+        "post": {
+          "tags": [
+            "customer-orders"
+          ],
+          "summary": "Place Order",
+          "description": "Place order from cart",
+          "operationId": "place_order_customer_orders__post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrderPlaceFromCart"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Order"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/customer/orders/{order_id}": {
+        "get": {
+          "tags": [
+            "customer-orders"
+          ],
+          "summary": "Get Order",
+          "description": "Get specific order details with product information",
+          "operationId": "get_order_customer_orders__order_id__get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "order_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Order Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/OrderWithDetails"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customer/orders/{order_id}/messages": {
+        "get": {
+          "tags": [
+            "customer-orders"
+          ],
+          "summary": "Get Order Messages",
+          "description": "Get messages for an order",
+          "operationId": "get_order_messages_customer_orders__order_id__messages_get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "order_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Order Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Message"
+                    },
+                    "title": "Response Get Order Messages Customer Orders  Order Id  Messages Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "customer-orders"
+          ],
+          "summary": "Send Order Message",
+          "description": "Send message for an order",
+          "operationId": "send_order_message_customer_orders__order_id__messages_post",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "order_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Order Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageCreate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Message"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customer/orders/{order_id}/cancel": {
+        "put": {
+          "tags": [
+            "customer-orders"
+          ],
+          "summary": "Cancel Order",
+          "description": "Cancel an order and void all associated invoices",
+          "operationId": "cancel_order_customer_orders__order_id__cancel_put",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "order_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Order Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Order"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customer/dashboard/": {
+        "get": {
+          "tags": [
+            "customer-dashboard"
+          ],
+          "summary": "Get Dashboard",
+          "description": "Get customer dashboard with stats and recent activity",
+          "operationId": "get_dashboard_customer_dashboard__get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CustomerDashboard"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/customer/dashboard/actions-needed": {
+        "get": {
+          "tags": [
+            "customer-dashboard"
+          ],
+          "summary": "Get Actions Needed",
+          "description": "Get orders that need customer action",
+          "operationId": "get_actions_needed_customer_dashboard_actions_needed_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "items": {
+                      "$ref": "#/components/schemas/Order"
+                    },
+                    "type": "array",
+                    "title": "Response Get Actions Needed Customer Dashboard Actions Needed Get"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/customer/claims/": {
+        "get": {
+          "tags": [
+            "customer-claims"
+          ],
+          "summary": "Get Claims",
+          "description": "Get all customer claims",
+          "operationId": "get_claims_customer_claims__get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "items": {
+                      "$ref": "#/components/schemas/ClaimWithDetails"
+                    },
+                    "type": "array",
+                    "title": "Response Get Claims Customer Claims  Get"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        },
+        "post": {
+          "tags": [
+            "customer-claims"
+          ],
+          "summary": "Create Claim",
+          "description": "Create a claim for a delivered order with multiple file uploads",
+          "operationId": "create_claim_customer_claims__post",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Claim"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/customer/claims/{claim_id}": {
+        "get": {
+          "tags": [
+            "customer-claims"
+          ],
+          "summary": "Get Claim",
+          "description": "Get specific claim details",
+          "operationId": "get_claim_customer_claims__claim_id__get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "claim_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Claim Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ClaimWithDetails"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customer/claims/{claim_id}/messages": {
+        "get": {
+          "tags": [
+            "customer-claims"
+          ],
+          "summary": "Get Claim Messages",
+          "description": "Get messages for a claim",
+          "operationId": "get_claim_messages_customer_claims__claim_id__messages_get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "claim_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Claim Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Message"
+                    },
+                    "title": "Response Get Claim Messages Customer Claims  Claim Id  Messages Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "customer-claims"
+          ],
+          "summary": "Send Claim Message",
+          "description": "Send message for a claim",
+          "operationId": "send_claim_message_customer_claims__claim_id__messages_post",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "claim_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Claim Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageCreate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Message"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/customer/payments/invoices": {
+        "get": {
+          "tags": [
+            "customer-payments"
+          ],
+          "summary": "Get Invoices",
+          "description": "Get all active invoices for customer (excludes cancelled invoices)",
+          "operationId": "get_invoices_customer_payments_invoices_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "items": {
+                      "$ref": "#/components/schemas/Invoice"
+                    },
+                    "type": "array",
+                    "title": "Response Get Invoices Customer Payments Invoices Get"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/customer/payments/invoices/{invoice_id}": {
+        "get": {
+          "tags": [
+            "customer-payments"
+          ],
+          "summary": "Get Invoice",
+          "description": "Get specific invoice details",
+          "operationId": "get_invoice_customer_payments_invoices__invoice_id__get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "invoice_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Invoice Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Invoice"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/orders/": {
+        "get": {
+          "tags": [
+            "admin-orders"
+          ],
+          "summary": "Get All Orders",
+          "description": "Get all orders with product information",
+          "operationId": "get_all_orders_admin_orders__get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "skip",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 0,
+                "title": "Skip"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 100,
+                "title": "Limit"
+              }
+            },
+            {
+              "name": "status",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Status"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/OrderWithDetails"
+                    },
+                    "title": "Response Get All Orders Admin Orders  Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/orders/{order_id}": {
+        "get": {
+          "tags": [
+            "admin-orders"
+          ],
+          "summary": "Get Order",
+          "description": "Get specific order details with product information",
+          "operationId": "get_order_admin_orders__order_id__get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "order_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Order Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/OrderWithDetails"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/orders/{order_id}/status": {
+        "put": {
+          "tags": [
+            "admin-orders"
+          ],
+          "summary": "Update Order Status",
+          "description": "Update order status with automatic alerts and invoice management",
+          "operationId": "update_order_status_admin_orders__order_id__status_put",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "order_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Order Id"
+              }
+            },
+            {
+              "name": "status",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "$ref": "#/components/schemas/OrderStatus"
+              }
+            },
+            {
+              "name": "notes",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Notes"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Order"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/orders/{order_id}/replace-product": {
+        "post": {
+          "tags": [
+            "admin-orders"
+          ],
+          "summary": "Replace Product With Substitute",
+          "description": "Replace a product in order with customer's selected substitute",
+          "operationId": "replace_product_with_substitute_admin_orders__order_id__replace_product_post",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "order_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Order Id"
+              }
+            },
+            {
+              "name": "line_id",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "integer",
+                "title": "Line Id"
+              }
+            },
+            {
+              "name": "substitute_product_code",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Substitute Product Code"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/OrderChange"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/orders/{order_id}/messages": {
+        "get": {
+          "tags": [
+            "admin-orders"
+          ],
+          "summary": "Get Order Messages",
+          "description": "Get messages for an order",
+          "operationId": "get_order_messages_admin_orders__order_id__messages_get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "order_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Order Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Message"
+                    },
+                    "title": "Response Get Order Messages Admin Orders  Order Id  Messages Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "admin-orders"
+          ],
+          "summary": "Send Order Message",
+          "description": "Send message for an order",
+          "operationId": "send_order_message_admin_orders__order_id__messages_post",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "order_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Order Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageCreate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Message"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/inventory/": {
+        "get": {
+          "tags": [
+            "admin-inventory"
+          ],
+          "summary": "Get Inventory",
+          "description": "Get all inventory items",
+          "operationId": "get_inventory_admin_inventory__get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "skip",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 0,
+                "title": "Skip"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 100,
+                "title": "Limit"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Inventory"
+                    },
+                    "title": "Response Get Inventory Admin Inventory  Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/inventory/{product_code}": {
+        "get": {
+          "tags": [
+            "admin-inventory"
+          ],
+          "summary": "Get Inventory Item",
+          "description": "Get inventory for specific product",
+          "operationId": "get_inventory_item_admin_inventory__product_code__get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "product_code",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Product Code"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Inventory"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "put": {
+          "tags": [
+            "admin-inventory"
+          ],
+          "summary": "Update Inventory",
+          "description": "Update inventory quantity",
+          "operationId": "update_inventory_admin_inventory__product_code__put",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "product_code",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Product Code"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InventoryUpdate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Inventory"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "admin-inventory"
+          ],
+          "summary": "Remove Product From Inventory",
+          "description": "Remove product from inventory (set quantity to 0)",
+          "operationId": "remove_product_from_inventory_admin_inventory__product_code__delete",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "product_code",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Product Code"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/claims/": {
+        "get": {
+          "tags": [
+            "admin-claims"
+          ],
+          "summary": "Get All Claims",
+          "description": "Get all claims with optional filters",
+          "operationId": "get_all_claims_admin_claims__get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "skip",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 0,
+                "title": "Skip"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 100,
+                "title": "Limit"
+              }
+            },
+            {
+              "name": "status",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Status"
+              }
+            },
+            {
+              "name": "requires_manual_review",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Requires Manual Review"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/ClaimWithDetails"
+                    },
+                    "title": "Response Get All Claims Admin Claims  Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/claims/manual-review": {
+        "get": {
+          "tags": [
+            "admin-claims"
+          ],
+          "summary": "Get Claims Requiring Manual Review",
+          "description": "Get claims that require manual review",
+          "operationId": "get_claims_requiring_manual_review_admin_claims_manual_review_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "items": {
+                      "$ref": "#/components/schemas/ClaimWithDetails"
+                    },
+                    "type": "array",
+                    "title": "Response Get Claims Requiring Manual Review Admin Claims Manual Review Get"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ]
+        }
+      },
+      "/admin/claims/{claim_id}": {
+        "get": {
+          "tags": [
+            "admin-claims"
+          ],
+          "summary": "Get Claim",
+          "description": "Get specific claim details",
+          "operationId": "get_claim_admin_claims__claim_id__get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "claim_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Claim Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/ClaimWithDetails"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/claims/{claim_id}/approve": {
+        "post": {
+          "tags": [
+            "admin-claims"
+          ],
+          "summary": "Approve Claim",
+          "description": "Approve a claim and generate refund",
+          "operationId": "approve_claim_admin_claims__claim_id__approve_post",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "claim_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Claim Id"
+              }
+            },
+            {
+              "name": "refund_amount",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Refund Amount"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Claim"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/claims/{claim_id}/reject": {
+        "post": {
+          "tags": [
+            "admin-claims"
+          ],
+          "summary": "Reject Claim",
+          "description": "Reject a claim with required reason",
+          "operationId": "reject_claim_admin_claims__claim_id__reject_post",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "claim_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Claim Id"
+              }
+            },
+            {
+              "name": "reason",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Reason"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Claim"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/claims/{claim_id}/messages": {
+        "get": {
+          "tags": [
+            "admin-claims"
+          ],
+          "summary": "Get Claim Messages",
+          "description": "Get messages for a claim",
+          "operationId": "get_claim_messages_admin_claims__claim_id__messages_get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "claim_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Claim Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Message"
+                    },
+                    "title": "Response Get Claim Messages Admin Claims  Claim Id  Messages Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "admin-claims"
+          ],
+          "summary": "Send Claim Message",
+          "description": "Send message for a claim",
+          "operationId": "send_claim_message_admin_claims__claim_id__messages_post",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "claim_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Claim Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageCreate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Message"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/customers/": {
+        "post": {
+          "tags": [
+            "admin-customers"
+          ],
+          "summary": "Create Customer",
+          "description": "Create a new customer",
+          "operationId": "create_customer_admin_customers__post",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerCreate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Customer"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "get": {
+          "tags": [
+            "admin-customers"
+          ],
+          "summary": "Get Customers",
+          "description": "Get all customers",
+          "operationId": "get_customers_admin_customers__get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "skip",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 0,
+                "title": "Skip"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 100,
+                "title": "Limit"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Customer"
+                    },
+                    "title": "Response Get Customers Admin Customers  Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/customers/{customer_id}/user": {
+        "post": {
+          "tags": [
+            "admin-customers"
+          ],
+          "summary": "Create Customer User",
+          "description": "Create user account for a customer",
+          "operationId": "create_customer_user_admin_customers__customer_id__user_post",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "customer_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Customer Id"
+              }
+            },
+            {
+              "name": "username",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Username"
+              }
+            },
+            {
+              "name": "email",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Email"
+              }
+            },
+            {
+              "name": "password",
+              "in": "query",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Password"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/User"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/customers/{customer_id}": {
+        "get": {
+          "tags": [
+            "admin-customers"
+          ],
+          "summary": "Get Customer",
+          "description": "Get specific customer",
+          "operationId": "get_customer_admin_customers__customer_id__get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "customer_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Customer Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Customer"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/products/": {
+        "post": {
+          "tags": [
+            "admin-products"
+          ],
+          "summary": "Create Product",
+          "description": "Create a new product",
+          "operationId": "create_product_admin_products__post",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductCreate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "get": {
+          "tags": [
+            "admin-products"
+          ],
+          "summary": "Get Products",
+          "description": "Get all products",
+          "operationId": "get_products_admin_products__get",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "skip",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 0,
+                "title": "Skip"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "default": 100,
+                "title": "Limit"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/Product"
+                    },
+                    "title": "Response Get Products Admin Products  Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/admin/products/{product_code}": {
+        "put": {
+          "tags": [
+            "admin-products"
+          ],
+          "summary": "Update Product",
+          "description": "Update product",
+          "operationId": "update_product_admin_products__product_code__put",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "product_code",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Product Code"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductBase"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Product"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "admin-products"
+          ],
+          "summary": "Delete Product",
+          "description": "Delete product",
+          "operationId": "delete_product_admin_products__product_code__delete",
+          "security": [
+            {
+              "OAuth2PasswordBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "product_code",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Product Code"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/": {
+        "get": {
+          "summary": "Root",
+          "description": "Root endpoint",
+          "operationId": "root__get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/health": {
+        "get": {
+          "summary": "Health Check",
+          "description": "Health check endpoint",
+          "operationId": "health_check_health_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "Cart": {
+          "properties": {
+            "cart_id": {
+              "type": "integer",
+              "title": "Cart Id"
+            },
+            "customer_id": {
+              "type": "string",
+              "title": "Customer Id"
+            },
+            "items": {
+              "items": {
+                "$ref": "#/components/schemas/CartItem"
+              },
+              "type": "array",
+              "title": "Items",
+              "default": []
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "cart_id",
+            "customer_id",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "Cart"
+        },
+        "CartItem": {
+          "properties": {
+            "cart_item_id": {
+              "type": "integer",
+              "title": "Cart Item Id"
+            },
+            "product_code": {
+              "type": "string",
+              "title": "Product Code"
+            },
+            "quantity": {
+              "type": "number",
+              "title": "Quantity"
+            },
+            "risk_score": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Risk Score"
+            },
+            "product": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Product"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "substitutes": {
+              "items": {
+                "type": "object"
+              },
+              "type": "array",
+              "title": "Substitutes",
+              "default": []
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "cart_item_id",
+            "product_code",
+            "quantity",
+            "created_at"
+          ],
+          "title": "CartItem"
+        },
+        "CartItemCreate": {
+          "properties": {
+            "product_code": {
+              "type": "string",
+              "title": "Product Code"
+            },
+            "quantity": {
+              "type": "number",
+              "title": "Quantity"
+            },
+            "substitutes": {
+              "items": {
+                "$ref": "#/components/schemas/CartItemSubstituteCreate"
+              },
+              "type": "array",
+              "title": "Substitutes",
+              "default": []
+            }
+          },
+          "type": "object",
+          "required": [
+            "product_code",
+            "quantity"
+          ],
+          "title": "CartItemCreate"
+        },
+        "CartItemQuantityUpdate": {
+          "properties": {
+            "quantity": {
+              "type": "number",
+              "title": "Quantity"
+            }
+          },
+          "type": "object",
+          "required": [
+            "quantity"
+          ],
+          "title": "CartItemQuantityUpdate"
+        },
+        "CartItemSubstituteCreate": {
+          "properties": {
+            "substitute_product_code": {
+              "type": "string",
+              "title": "Substitute Product Code"
+            },
+            "priority": {
+              "type": "integer",
+              "title": "Priority"
+            }
+          },
+          "type": "object",
+          "required": [
+            "substitute_product_code",
+            "priority"
+          ],
+          "title": "CartItemSubstituteCreate"
+        },
+        "Claim": {
+          "properties": {
+            "claim_id": {
+              "type": "string",
+              "title": "Claim Id"
+            },
+            "order_id": {
+              "type": "string",
+              "title": "Order Id"
+            },
+            "customer_id": {
+              "type": "string",
+              "title": "Customer Id"
+            },
+            "claim_type": {
+              "$ref": "#/components/schemas/ClaimType"
+            },
+            "status": {
+              "$ref": "#/components/schemas/ClaimStatus"
+            },
+            "channel": {
+              "type": "string",
+              "title": "Channel"
+            },
+            "model_confidence_score": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Confidence Score"
+            },
+            "resolution_type": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ResolutionType"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "credit_amount": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Credit Amount"
+            },
+            "re_delivery_date": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Re Delivery Date"
+            },
+            "handled_by": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Handled By"
+            },
+            "rejection_reason": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rejection Reason"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            },
+            "claim_lines": {
+              "items": {
+                "$ref": "#/components/schemas/ClaimLine"
+              },
+              "type": "array",
+              "title": "Claim Lines",
+              "default": []
+            },
+            "claim_attachments": {
+              "items": {
+                "$ref": "#/components/schemas/ClaimAttachment"
+              },
+              "type": "array",
+              "title": "Claim Attachments",
+              "default": []
+            }
+          },
+          "type": "object",
+          "required": [
+            "claim_id",
+            "order_id",
+            "customer_id",
+            "claim_type",
+            "status",
+            "channel",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "Claim"
+        },
+        "ClaimAttachment": {
+          "properties": {
+            "attachment_id": {
+              "type": "integer",
+              "title": "Attachment Id"
+            },
+            "claim_id": {
+              "type": "string",
+              "title": "Claim Id"
+            },
+            "file_path": {
+              "type": "string",
+              "title": "File Path"
+            },
+            "file_type": {
+              "type": "string",
+              "title": "File Type"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "attachment_id",
+            "claim_id",
+            "file_path",
+            "file_type",
+            "created_at"
+          ],
+          "title": "ClaimAttachment"
+        },
+        "ClaimLine": {
+          "properties": {
+            "claim_line_id": {
+              "type": "integer",
+              "title": "Claim Line Id"
+            },
+            "claim_id": {
+              "type": "string",
+              "title": "Claim Id"
+            },
+            "line_id": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Line Id"
+            },
+            "product_code": {
+              "type": "string",
+              "title": "Product Code"
+            },
+            "reported_issue": {
+              "type": "string",
+              "title": "Reported Issue"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "claim_line_id",
+            "claim_id",
+            "product_code",
+            "reported_issue",
+            "created_at"
+          ],
+          "title": "ClaimLine"
+        },
+        "ClaimProcessing": {
+          "properties": {
+            "processing_id": {
+              "type": "integer",
+              "title": "Processing Id"
+            },
+            "claim_id": {
+              "type": "string",
+              "title": "Claim Id"
+            },
+            "ai_processed": {
+              "type": "boolean",
+              "title": "Ai Processed"
+            },
+            "ai_confidence": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ai Confidence"
+            },
+            "ai_result": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Ai Result"
+            },
+            "requires_manual_review": {
+              "type": "boolean",
+              "title": "Requires Manual Review"
+            },
+            "reviewed_by": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reviewed By"
+            },
+            "reviewed_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Reviewed At"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "processing_id",
+            "claim_id",
+            "ai_processed",
+            "requires_manual_review",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "ClaimProcessing"
+        },
+        "ClaimStatus": {
+          "type": "string",
+          "enum": [
+            "open",
+            "ai_processing",
+            "manual_review",
+            "approved",
+            "rejected",
+            "resolved"
+          ],
+          "title": "ClaimStatus"
+        },
+        "ClaimType": {
+          "type": "string",
+          "enum": [
+            "MISSING_ITEM",
+            "DAMAGED_ITEM",
+            "WRONG_ITEM",
+            "QUALITY_ISSUE"
+          ],
+          "title": "ClaimType"
+        },
+        "ClaimWithDetails": {
+          "properties": {
+            "claim_id": {
+              "type": "string",
+              "title": "Claim Id"
+            },
+            "order_id": {
+              "type": "string",
+              "title": "Order Id"
+            },
+            "customer_id": {
+              "type": "string",
+              "title": "Customer Id"
+            },
+            "claim_type": {
+              "$ref": "#/components/schemas/ClaimType"
+            },
+            "status": {
+              "$ref": "#/components/schemas/ClaimStatus"
+            },
+            "channel": {
+              "type": "string",
+              "title": "Channel"
+            },
+            "model_confidence_score": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Confidence Score"
+            },
+            "resolution_type": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ResolutionType"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "credit_amount": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Credit Amount"
+            },
+            "re_delivery_date": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Re Delivery Date"
+            },
+            "handled_by": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Handled By"
+            },
+            "rejection_reason": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rejection Reason"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            },
+            "claim_lines": {
+              "items": {
+                "$ref": "#/components/schemas/ClaimLine"
+              },
+              "type": "array",
+              "title": "Claim Lines",
+              "default": []
+            },
+            "claim_attachments": {
+              "items": {
+                "$ref": "#/components/schemas/ClaimAttachment"
+              },
+              "type": "array",
+              "title": "Claim Attachments",
+              "default": []
+            },
+            "messages": {
+              "items": {
+                "$ref": "#/components/schemas/Message"
+              },
+              "type": "array",
+              "title": "Messages",
+              "default": []
+            },
+            "processing": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ClaimProcessing"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "type": "object",
+          "required": [
+            "claim_id",
+            "order_id",
+            "customer_id",
+            "claim_type",
+            "status",
+            "channel",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "ClaimWithDetails"
+        },
+        "ContactChannel": {
+          "type": "string",
+          "enum": [
+            "voice_first",
+            "sms_first",
+            "email_only"
+          ],
+          "title": "ContactChannel"
+        },
+        "Customer": {
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Name"
+            },
+            "segment": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Segment"
+            },
+            "language_preference": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Language"
+                }
+              ],
+              "default": "fi"
+            },
+            "contact_channel": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ContactChannel"
+                }
+              ],
+              "default": "voice_first"
+            },
+            "no_call_before": {
+              "type": "string",
+              "title": "No Call Before",
+              "default": "07:00"
+            },
+            "accept_auto_substitutions_for_flexible_items": {
+              "type": "boolean",
+              "title": "Accept Auto Substitutions For Flexible Items",
+              "default": true
+            },
+            "location": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Location"
+            },
+            "customer_id": {
+              "type": "string",
+              "title": "Customer Id"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "name",
+            "customer_id",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "Customer"
+        },
+        "CustomerCreate": {
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Name"
+            },
+            "segment": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Segment"
+            },
+            "language_preference": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/Language"
+                }
+              ],
+              "default": "fi"
+            },
+            "contact_channel": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ContactChannel"
+                }
+              ],
+              "default": "voice_first"
+            },
+            "no_call_before": {
+              "type": "string",
+              "title": "No Call Before",
+              "default": "07:00"
+            },
+            "accept_auto_substitutions_for_flexible_items": {
+              "type": "boolean",
+              "title": "Accept Auto Substitutions For Flexible Items",
+              "default": true
+            },
+            "location": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Location"
+            },
+            "customer_id": {
+              "type": "string",
+              "title": "Customer Id"
+            }
+          },
+          "type": "object",
+          "required": [
+            "name",
+            "customer_id"
+          ],
+          "title": "CustomerCreate"
+        },
+        "CustomerDashboard": {
+          "properties": {
+            "customer": {
+              "$ref": "#/components/schemas/Customer"
+            },
+            "recent_orders": {
+              "items": {
+                "$ref": "#/components/schemas/Order"
+              },
+              "type": "array",
+              "title": "Recent Orders"
+            },
+            "open_claims": {
+              "items": {
+                "$ref": "#/components/schemas/Claim"
+              },
+              "type": "array",
+              "title": "Open Claims"
+            },
+            "stats": {
+              "$ref": "#/components/schemas/OrderStats"
+            }
+          },
+          "type": "object",
+          "required": [
+            "customer",
+            "recent_orders",
+            "open_claims",
+            "stats"
+          ],
+          "title": "CustomerDashboard"
+        },
+        "HTTPValidationError": {
+          "properties": {
+            "detail": {
+              "items": {
+                "$ref": "#/components/schemas/ValidationError"
+              },
+              "type": "array",
+              "title": "Detail"
+            }
+          },
+          "type": "object",
+          "title": "HTTPValidationError"
+        },
+        "Inventory": {
+          "properties": {
+            "inventory_id": {
+              "type": "integer",
+              "title": "Inventory Id"
+            },
+            "product_code": {
+              "type": "string",
+              "title": "Product Code"
+            },
+            "quantity": {
+              "type": "number",
+              "title": "Quantity"
+            },
+            "reserved_quantity": {
+              "type": "number",
+              "title": "Reserved Quantity"
+            },
+            "available_quantity": {
+              "type": "number",
+              "title": "Available Quantity"
+            },
+            "last_updated": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Last Updated"
+            },
+            "updated_by": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Updated By"
+            },
+            "product": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Product"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "type": "object",
+          "required": [
+            "inventory_id",
+            "product_code",
+            "quantity",
+            "reserved_quantity",
+            "available_quantity",
+            "last_updated"
+          ],
+          "title": "Inventory"
+        },
+        "InventoryUpdate": {
+          "properties": {
+            "quantity": {
+              "type": "number",
+              "title": "Quantity"
+            }
+          },
+          "type": "object",
+          "required": [
+            "quantity"
+          ],
+          "title": "InventoryUpdate"
+        },
+        "Invoice": {
+          "properties": {
+            "invoice_id": {
+              "type": "string",
+              "title": "Invoice Id"
+            },
+            "order_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Order Id"
+            },
+            "claim_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Claim Id"
+            },
+            "customer_id": {
+              "type": "string",
+              "title": "Customer Id"
+            },
+            "invoice_type": {
+              "$ref": "#/components/schemas/InvoiceType"
+            },
+            "status": {
+              "$ref": "#/components/schemas/InvoiceStatus"
+            },
+            "total_amount": {
+              "type": "number",
+              "title": "Total Amount"
+            },
+            "tax_amount": {
+              "type": "number",
+              "title": "Tax Amount"
+            },
+            "notes": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Notes"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "paid_at": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Paid At"
+            },
+            "items": {
+              "items": {
+                "$ref": "#/components/schemas/InvoiceItem"
+              },
+              "type": "array",
+              "title": "Items",
+              "default": []
+            }
+          },
+          "type": "object",
+          "required": [
+            "invoice_id",
+            "customer_id",
+            "invoice_type",
+            "status",
+            "total_amount",
+            "tax_amount",
+            "created_at"
+          ],
+          "title": "Invoice"
+        },
+        "InvoiceItem": {
+          "properties": {
+            "item_id": {
+              "type": "integer",
+              "title": "Item Id"
+            },
+            "invoice_id": {
+              "type": "string",
+              "title": "Invoice Id"
+            },
+            "product_code": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Product Code"
+            },
+            "description": {
+              "type": "string",
+              "title": "Description"
+            },
+            "quantity": {
+              "type": "number",
+              "title": "Quantity"
+            },
+            "unit_price": {
+              "type": "number",
+              "title": "Unit Price"
+            },
+            "total_price": {
+              "type": "number",
+              "title": "Total Price"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "item_id",
+            "invoice_id",
+            "description",
+            "quantity",
+            "unit_price",
+            "total_price",
+            "created_at"
+          ],
+          "title": "InvoiceItem"
+        },
+        "InvoiceStatus": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "paid",
+            "refunded",
+            "cancelled"
+          ],
+          "title": "InvoiceStatus"
+        },
+        "InvoiceType": {
+          "type": "string",
+          "enum": [
+            "order",
+            "refund",
+            "modification"
+          ],
+          "title": "InvoiceType"
+        },
+        "Language": {
+          "type": "string",
+          "enum": [
+            "fi",
+            "sv",
+            "en"
+          ],
+          "title": "Language"
+        },
+        "LineStatus": {
+          "type": "string",
+          "enum": [
+            "OK",
+            "PARTIAL",
+            "ZERO",
+            "REPLACED"
+          ],
+          "title": "LineStatus"
+        },
+        "Message": {
+          "properties": {
+            "message_id": {
+              "type": "integer",
+              "title": "Message Id"
+            },
+            "order_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Order Id"
+            },
+            "claim_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Claim Id"
+            },
+            "sender_type": {
+              "$ref": "#/components/schemas/MessageSenderType"
+            },
+            "sender_id": {
+              "type": "string",
+              "title": "Sender Id"
+            },
+            "content": {
+              "type": "string",
+              "title": "Content"
+            },
+            "is_read": {
+              "type": "boolean",
+              "title": "Is Read"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "message_id",
+            "sender_type",
+            "sender_id",
+            "content",
+            "is_read",
+            "created_at"
+          ],
+          "title": "Message"
+        },
+        "MessageCreate": {
+          "properties": {
+            "content": {
+              "type": "string",
+              "title": "Content"
+            },
+            "order_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Order Id"
+            },
+            "claim_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Claim Id"
+            }
+          },
+          "type": "object",
+          "required": [
+            "content"
+          ],
+          "title": "MessageCreate"
+        },
+        "MessageSenderType": {
+          "type": "string",
+          "enum": [
+            "customer",
+            "admin",
+            "ai"
+          ],
+          "title": "MessageSenderType"
+        },
+        "Order": {
+          "properties": {
+            "delivery_date": {
+              "type": "string",
+              "title": "Delivery Date"
+            },
+            "delivery_window_start": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Delivery Window Start"
+            },
+            "delivery_window_end": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Delivery Window End"
+            },
+            "channel": {
+              "type": "string",
+              "title": "Channel",
+              "default": "web"
+            },
+            "order_id": {
+              "type": "string",
+              "title": "Order Id"
+            },
+            "customer_id": {
+              "type": "string",
+              "title": "Customer Id"
+            },
+            "order_datetime": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Order Datetime"
+            },
+            "status": {
+              "$ref": "#/components/schemas/OrderStatus"
+            },
+            "overall_order_risk": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Overall Order Risk"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            },
+            "order_lines": {
+              "items": {
+                "$ref": "#/components/schemas/OrderLine"
+              },
+              "type": "array",
+              "title": "Order Lines",
+              "default": []
+            }
+          },
+          "type": "object",
+          "required": [
+            "delivery_date",
+            "order_id",
+            "customer_id",
+            "order_datetime",
+            "status",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "Order"
+        },
+        "OrderChange": {
+          "properties": {
+            "change_id": {
+              "type": "integer",
+              "title": "Change Id"
+            },
+            "order_id": {
+              "type": "string",
+              "title": "Order Id"
+            },
+            "line_id": {
+              "type": "integer",
+              "title": "Line Id"
+            },
+            "old_product_code": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Old Product Code"
+            },
+            "new_product_code": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "New Product Code"
+            },
+            "change_reason": {
+              "type": "string",
+              "title": "Change Reason"
+            },
+            "confirmed_by": {
+              "type": "string",
+              "title": "Confirmed By"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "change_id",
+            "order_id",
+            "line_id",
+            "change_reason",
+            "confirmed_by",
+            "created_at"
+          ],
+          "title": "OrderChange"
+        },
+        "OrderLine": {
+          "properties": {
+            "product_code": {
+              "type": "string",
+              "title": "Product Code"
+            },
+            "ordered_qty": {
+              "type": "number",
+              "title": "Ordered Qty"
+            },
+            "item_priority": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/PriorityLevel"
+                }
+              ],
+              "default": "IMPORTANT"
+            },
+            "auto_substitution_allowed": {
+              "type": "boolean",
+              "title": "Auto Substitution Allowed",
+              "default": true
+            },
+            "customer_comments": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Comments"
+            },
+            "line_id": {
+              "type": "integer",
+              "title": "Line Id"
+            },
+            "order_id": {
+              "type": "string",
+              "title": "Order Id"
+            },
+            "delivered_qty": {
+              "type": "number",
+              "title": "Delivered Qty"
+            },
+            "shortage_flag": {
+              "type": "boolean",
+              "title": "Shortage Flag"
+            },
+            "shortage_ratio": {
+              "type": "number",
+              "title": "Shortage Ratio"
+            },
+            "risk_score": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Risk Score"
+            },
+            "line_status": {
+              "$ref": "#/components/schemas/LineStatus"
+            },
+            "product": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Product"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "order_changes": {
+              "items": {
+                "$ref": "#/components/schemas/OrderChange"
+              },
+              "type": "array",
+              "title": "Order Changes",
+              "default": []
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "product_code",
+            "ordered_qty",
+            "line_id",
+            "order_id",
+            "delivered_qty",
+            "shortage_flag",
+            "shortage_ratio",
+            "line_status",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "OrderLine"
+        },
+        "OrderPlaceFromCart": {
+          "properties": {
+            "delivery_date": {
+              "type": "string",
+              "title": "Delivery Date"
+            },
+            "delivery_window_start": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Delivery Window Start"
+            },
+            "delivery_window_end": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Delivery Window End"
+            }
+          },
+          "type": "object",
+          "required": [
+            "delivery_date"
+          ],
+          "title": "OrderPlaceFromCart"
+        },
+        "OrderStats": {
+          "properties": {
+            "total_orders": {
+              "type": "integer",
+              "title": "Total Orders"
+            },
+            "orders_at_risk": {
+              "type": "integer",
+              "title": "Orders At Risk"
+            },
+            "orders_in_picking": {
+              "type": "integer",
+              "title": "Orders In Picking"
+            },
+            "orders_delivered_today": {
+              "type": "integer",
+              "title": "Orders Delivered Today"
+            }
+          },
+          "type": "object",
+          "required": [
+            "total_orders",
+            "orders_at_risk",
+            "orders_in_picking",
+            "orders_delivered_today"
+          ],
+          "title": "OrderStats"
+        },
+        "OrderStatus": {
+          "type": "string",
+          "enum": [
+            "placed",
+            "under_risk",
+            "waiting_for_customer_action",
+            "picking",
+            "delivering",
+            "delivered",
+            "cancelled"
+          ],
+          "title": "OrderStatus"
+        },
+        "OrderSubstitute": {
+          "properties": {
+            "substitute_id": {
+              "type": "integer",
+              "title": "Substitute Id"
+            },
+            "order_id": {
+              "type": "string",
+              "title": "Order Id"
+            },
+            "line_id": {
+              "type": "integer",
+              "title": "Line Id"
+            },
+            "substitute_product_code": {
+              "type": "string",
+              "title": "Substitute Product Code"
+            },
+            "priority": {
+              "type": "integer",
+              "title": "Priority"
+            },
+            "is_used": {
+              "type": "boolean",
+              "title": "Is Used"
+            },
+            "substitute_product": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Product"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "substitute_id",
+            "order_id",
+            "line_id",
+            "substitute_product_code",
+            "priority",
+            "is_used",
+            "created_at"
+          ],
+          "title": "OrderSubstitute"
+        },
+        "OrderTracking": {
+          "properties": {
+            "tracking_id": {
+              "type": "integer",
+              "title": "Tracking Id"
+            },
+            "order_id": {
+              "type": "string",
+              "title": "Order Id"
+            },
+            "status": {
+              "$ref": "#/components/schemas/OrderStatus"
+            },
+            "updated_by": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Updated By"
+            },
+            "notes": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Notes"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "tracking_id",
+            "order_id",
+            "status",
+            "created_at"
+          ],
+          "title": "OrderTracking"
+        },
+        "OrderWithDetails": {
+          "properties": {
+            "delivery_date": {
+              "type": "string",
+              "title": "Delivery Date"
+            },
+            "delivery_window_start": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Delivery Window Start"
+            },
+            "delivery_window_end": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Delivery Window End"
+            },
+            "channel": {
+              "type": "string",
+              "title": "Channel",
+              "default": "web"
+            },
+            "order_id": {
+              "type": "string",
+              "title": "Order Id"
+            },
+            "customer_id": {
+              "type": "string",
+              "title": "Customer Id"
+            },
+            "order_datetime": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Order Datetime"
+            },
+            "status": {
+              "$ref": "#/components/schemas/OrderStatus"
+            },
+            "overall_order_risk": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Overall Order Risk"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            },
+            "order_lines": {
+              "items": {
+                "$ref": "#/components/schemas/OrderLine"
+              },
+              "type": "array",
+              "title": "Order Lines",
+              "default": []
+            },
+            "order_substitutes": {
+              "items": {
+                "$ref": "#/components/schemas/OrderSubstitute"
+              },
+              "type": "array",
+              "title": "Order Substitutes",
+              "default": []
+            },
+            "tracking_history": {
+              "items": {
+                "$ref": "#/components/schemas/OrderTracking"
+              },
+              "type": "array",
+              "title": "Tracking History",
+              "default": []
+            },
+            "messages": {
+              "items": {
+                "$ref": "#/components/schemas/Message"
+              },
+              "type": "array",
+              "title": "Messages",
+              "default": []
+            }
+          },
+          "type": "object",
+          "required": [
+            "delivery_date",
+            "order_id",
+            "customer_id",
+            "order_datetime",
+            "status",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "OrderWithDetails"
+        },
+        "PriorityLevel": {
+          "type": "string",
+          "enum": [
+            "CRITICAL",
+            "IMPORTANT",
+            "FLEXIBLE"
+          ],
+          "title": "PriorityLevel"
+        },
+        "Product": {
+          "properties": {
+            "product_name": {
+              "type": "string",
+              "title": "Product Name"
+            },
+            "category": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            },
+            "sub_category": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sub Category"
+            },
+            "temperature_zone": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Temperature Zone"
+            },
+            "shelf_life_days": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Shelf Life Days"
+            },
+            "unit_size": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Unit Size"
+            },
+            "unit_type": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Unit Type"
+            },
+            "price": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Price"
+            },
+            "product_code": {
+              "type": "string",
+              "title": "Product Code"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "product_name",
+            "product_code",
+            "created_at",
+            "updated_at"
+          ],
+          "title": "Product"
+        },
+        "ProductBase": {
+          "properties": {
+            "product_name": {
+              "type": "string",
+              "title": "Product Name"
+            },
+            "category": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            },
+            "sub_category": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sub Category"
+            },
+            "temperature_zone": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Temperature Zone"
+            },
+            "shelf_life_days": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Shelf Life Days"
+            },
+            "unit_size": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Unit Size"
+            },
+            "unit_type": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Unit Type"
+            },
+            "price": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Price"
+            }
+          },
+          "type": "object",
+          "required": [
+            "product_name"
+          ],
+          "title": "ProductBase"
+        },
+        "ProductCreate": {
+          "properties": {
+            "product_name": {
+              "type": "string",
+              "title": "Product Name"
+            },
+            "category": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Category"
+            },
+            "sub_category": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sub Category"
+            },
+            "temperature_zone": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Temperature Zone"
+            },
+            "shelf_life_days": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Shelf Life Days"
+            },
+            "unit_size": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Unit Size"
+            },
+            "unit_type": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Unit Type"
+            },
+            "price": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Price"
+            },
+            "product_code": {
+              "type": "string",
+              "title": "Product Code"
+            }
+          },
+          "type": "object",
+          "required": [
+            "product_name",
+            "product_code"
+          ],
+          "title": "ProductCreate"
+        },
+        "ResolutionType": {
+          "type": "string",
+          "enum": [
+            "CREDIT",
+            "REDELIVERY_SAME_DAY",
+            "REDELIVERY_NEXT_DAY",
+            "REPLACEMENT_NEXT_ORDER"
+          ],
+          "title": "ResolutionType"
+        },
+        "Token": {
+          "properties": {
+            "access_token": {
+              "type": "string",
+              "title": "Access Token"
+            },
+            "token_type": {
+              "type": "string",
+              "title": "Token Type"
+            },
+            "user_id": {
+              "type": "string",
+              "title": "User Id"
+            },
+            "role": {
+              "$ref": "#/components/schemas/UserRole"
+            }
+          },
+          "type": "object",
+          "required": [
+            "access_token",
+            "token_type",
+            "user_id",
+            "role"
+          ],
+          "title": "Token"
+        },
+        "User": {
+          "properties": {
+            "user_id": {
+              "type": "string",
+              "title": "User Id"
+            },
+            "username": {
+              "type": "string",
+              "title": "Username"
+            },
+            "email": {
+              "type": "string",
+              "title": "Email"
+            },
+            "role": {
+              "$ref": "#/components/schemas/UserRole"
+            },
+            "customer_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Customer Id"
+            },
+            "is_active": {
+              "type": "boolean",
+              "title": "Is Active"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            }
+          },
+          "type": "object",
+          "required": [
+            "user_id",
+            "username",
+            "email",
+            "role",
+            "is_active",
+            "created_at"
+          ],
+          "title": "User"
+        },
+        "UserLogin": {
+          "properties": {
+            "username": {
+              "type": "string",
+              "title": "Username"
+            },
+            "password": {
+              "type": "string",
+              "title": "Password"
+            }
+          },
+          "type": "object",
+          "required": [
+            "username",
+            "password"
+          ],
+          "title": "UserLogin"
+        },
+        "UserRole": {
+          "type": "string",
+          "enum": [
+            "admin",
+            "customer"
+          ],
+          "title": "UserRole"
+        },
+        "ValidationError": {
+          "properties": {
+            "loc": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "type": "array",
+              "title": "Location"
+            },
+            "msg": {
+              "type": "string",
+              "title": "Message"
+            },
+            "type": {
+              "type": "string",
+              "title": "Error Type"
+            }
+          },
+          "type": "object",
+          "required": [
+            "loc",
+            "msg",
+            "type"
+          ],
+          "title": "ValidationError"
+        }
+      },
+      "securitySchemes": {
+        "OAuth2PasswordBearer": {
+          "type": "oauth2",
+          "flows": {
+            "password": {
+              "scopes": {
+  
+              },
+              "tokenUrl": "auth/login"
+            }
+          }
+        }
+      }
+    }
+  }
