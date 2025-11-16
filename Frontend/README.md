@@ -107,7 +107,7 @@ Omni-Valio is a comprehensive logistics management platform designed for profess
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd valio-nexus
+cd Frontend
 
 # Install dependencies
 npm install
@@ -215,9 +215,6 @@ The platform uses AI to assess shortage risk for products in the cart:
 
 This is a proprietary project. For contributions or questions, please contact the development team.
 
-## 📄 License
-
-Proprietary - Valio Aimo
 
 ## 🔗 Links
 

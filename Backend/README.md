@@ -36,37 +36,225 @@ FastAPI backend for the Zero-Fail Logistics Customer Portal with complete custom
 
 ## Installation
 
-1. Create a virtual environment:
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd Backend
+```
+
+2. Create a virtual environment:
 ```bash
 python -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
-2. Install dependencies:
+3. Install dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Seed sample data (optional):
+4. Set up environment variables (optional):
+Create a `.env` file in the root directory for API keys and configuration:
+```env
+OPENAI_API_KEY=your_openai_api_key
+PINECONE_API_KEY=your_pinecone_api_key
+PINECONE_ENVIRONMENT=your_pinecone_environment
+RISK_PREDICTION_API_URL=https://your-risk-api-url.com
+JWT_SECRET_KEY=your-secret-key-here
+```
+
+5. Initialize the database:
+The database is automatically created when the application starts. For manual initialization:
+```bash
+python -c "from app.database import init_db; init_db()"
+```
+
+6. Load product data (optional):
+```bash
+python load_product_data.py
+```
+
+7. Update product prices (if needed):
+```bash
+python update_product_prices.py
+```
+
+8. Populate inventory (optional):
+```bash
+python populate_inventory.py
+```
+
+9. Seed sample data (optional):
 ```bash
 python seed_data.py
 ```
 
 This creates:
 - Admin user: `admin` / `admin123`
-- Customer user: `customer1` / `customer123`
+- Customer user: `unicafe` / `customer123` (email: `unicafe@helsinki.fi`)
 - Sample products and inventory
 
 ## Running the Server
 
+### Development Mode (Local)
+
+For local development with auto-reload:
+
 ```bash
-uvicorn app.main:app --reload
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
 ```
 
 The API will be available at:
 - API: http://localhost:8000
 - Interactive Docs: http://localhost:8000/docs
 - Alternative Docs: http://localhost:8000/redoc
+- Health Check: http://localhost:8000/health
+
+### Production Mode with PM2
+
+For production deployment, use PM2 for process management:
+
+1. Install PM2 (if not already installed):
+```bash
+npm install -g pm2
+```
+
+2. Make the run script executable:
+```bash
+chmod +x run.sh
+```
+
+3. Run the application:
+```bash
+./run.sh
+```
+
+This will:
+- Start the FastAPI server as a PM2 process named `omni-valio-backend`
+- Run on `127.0.0.1:8000` (localhost only)
+- Save the process to PM2's startup list
+
+#### PM2 Management Commands
+
+```bash
+# View application status
+pm2 status
+
+# View logs
+pm2 logs omni-valio-backend
+
+# View last 50 lines of logs
+pm2 logs omni-valio-backend --lines 50
+
+# Restart application
+pm2 restart omni-valio-backend
+
+# Stop application
+pm2 stop omni-valio-backend
+
+# Delete process (after stopping)
+pm2 delete omni-valio-backend
+
+# Save PM2 process list (auto-saves on start)
+pm2 save
+
+# Setup PM2 to start on system boot
+pm2 startup
+```
+
+### Running on Custom Host/Port
+
+To run on a different host or port:
+
+```bash
+# Using uvicorn directly
+uvicorn app.main:app --host 0.0.0.0 --port 8080
+
+# Using PM2 with custom settings
+pm2 start python3 --name "omni-valio-backend" -- \
+    -m uvicorn app.main:app \
+    --host 0.0.0.0 \
+    --port 8080
+```
+
+**Note**: For external access (host `0.0.0.0`), ensure firewall rules allow traffic on the specified port.
+
+### Cloud Deployment (GCP/AWS/Azure)
+
+1. **Prepare the server**:
+   - Install Python 3.8+
+   - Install Node.js and PM2
+   - Install project dependencies
+
+2. **Set up firewall rules** (if exposing publicly):
+   - GCP: Create firewall rule allowing TCP port 8000
+   - AWS: Configure security group to allow port 8000
+   - Azure: Configure network security group
+
+3. **Deploy the code**:
+```bash
+# Clone or upload code
+git clone <repository-url>
+cd Backend
+
+# Set up virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Initialize database and load data
+python load_product_data.py
+python update_product_prices.py
+python populate_inventory.py
+```
+
+4. **Run with PM2**:
+```bash
+chmod +x run.sh
+./run.sh
+```
+
+5. **Set up reverse proxy (recommended)**:
+For production, use Nginx as a reverse proxy:
+
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+### Docker Deployment (Optional)
+
+Create a `Dockerfile`:
+```dockerfile
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+```
+
+Build and run:
+```bash
+docker build -t valio-aimo-backend .
+docker run -p 8000:8000 valio-aimo-backend
+```
 
 ## Database
 
@@ -222,13 +410,86 @@ Backend/
 └── README.md
 ```
 
+## Deployment Considerations
+
+### Security
+
+- **Change default passwords**: Update admin and customer passwords in production
+- **JWT Secret Key**: Set a strong secret key in `.env` or `app/auth.py`
+- **CORS**: Update CORS origins in `app/main.py` to allow only your frontend domains
+- **API Keys**: Store API keys (OpenAI, Pinecone, etc.) in environment variables, never commit them
+- **HTTPS**: Use HTTPS in production (set up SSL certificate with Nginx/Apache)
+
+### Performance
+
+- **Database**: Consider migrating from SQLite to PostgreSQL for production workloads
+- **Connection Pooling**: Configure database connection pooling for high traffic
+- **Caching**: Implement Redis caching for frequently accessed data
+- **File Storage**: Use cloud storage (S3, GCS) for claim attachments instead of local filesystem
+
+### Monitoring
+
+- **PM2 Monitoring**: Use `pm2 monit` to monitor CPU and memory usage
+- **Logging**: Set up centralized logging (ELK, CloudWatch, etc.)
+- **Health Checks**: Use `/health` endpoint for load balancer health checks
+- **Error Tracking**: Integrate error tracking service (Sentry, Rollbar, etc.)
+
+## Troubleshooting
+
+### Port Already in Use
+
+```bash
+# Find process using port 8000
+sudo lsof -i :8000
+# or
+sudo netstat -tlnp | grep 8000
+
+# Kill the process
+kill -9 <PID>
+```
+
+### Database Issues
+
+```bash
+# Reset database (WARNING: deletes all data)
+rm valio_aimo.db
+python -c "from app.database import init_db; init_db()"
+
+# Update inventory schema (if needed)
+python update_inventory_schema.py
+```
+
+### PM2 Issues
+
+```bash
+# Clear PM2 logs
+pm2 flush
+
+# Restart all processes
+pm2 restart all
+
+# Check PM2 error logs
+pm2 logs omni-valio-backend --err
+```
+
+### Module Import Errors
+
+```bash
+# Ensure virtual environment is activated
+source venv/bin/activate
+
+# Reinstall dependencies
+pip install -r requirements.txt --force-reinstall
+```
+
 ## Notes
 
-- Risk evaluation and similar products endpoints are placeholders - integrate with ML models in production
-- Claim AI processing is a placeholder - integrate with vision model in production
+- Risk evaluation and similar products endpoints use AI services (OpenAI, Pinecone) - configure API keys in `.env`
+- Claim AI processing uses OpenAI Vision API for image analysis
 - File uploads for claims are saved to `uploads/claims/` directory
-- JWT secret key should be changed in production (in `app/auth.py`)
+- JWT secret key should be changed in production (set via `JWT_SECRET_KEY` environment variable or in `app/auth.py`)
 - Default passwords in seed data should be changed in production
+- For production, remove `--reload` flag and use production ASGI server (gunicorn with uvicorn workers)
 
 ## License
 
