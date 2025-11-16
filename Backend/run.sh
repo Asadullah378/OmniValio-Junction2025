@@ -30,12 +30,12 @@ if ! $PYTHON_CMD -m uvicorn --help &> /dev/null; then
 fi
 
 # Stop existing FastAPI process if running
-pm2 stop fastapi-app 2>/dev/null || true
-pm2 delete fastapi-app 2>/dev/null || true
+pm2 stop omni-valio-backend 2>/dev/null || true
+pm2 delete omni-valio-backend 2>/dev/null || true
 
 # Start FastAPI with PM2
 echo "Starting FastAPI application with PM2..."
-pm2 start "$PYTHON_CMD" --name "fastapi-app" -- \
+pm2 start "$PYTHON_CMD" --name "omni-valio-backend" -- \
     -m uvicorn app.main:app \
     --host 0.0.0.0 \
     --port 8000
@@ -46,8 +46,8 @@ pm2 save
 # Show status
 echo ""
 echo "FastAPI application started with PM2!"
-echo "To view logs: pm2 logs fastapi-app"
-echo "To stop: pm2 stop fastapi-app"
-echo "To restart: pm2 restart fastapi-app"
+echo "To view logs: pm2 logs omni-valio-backend"
+echo "To stop: pm2 stop omni-valio-backend"
+echo "To restart: pm2 restart omni-valio-backend"
 echo "To view status: pm2 status"
 
