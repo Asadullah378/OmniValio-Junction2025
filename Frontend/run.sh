@@ -17,7 +17,7 @@ pm2 stop valio-nexus || true
 pm2 delete valio-nexus || true
 
 echo "Starting server with PM2..."
-pm2 start server.js --name valio-nexus
+pm2 start server.cjs --name valio-nexus
 
 echo "Saving PM2 process list..."
 pm2 save
