@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { LayoutDashboard, ShoppingCart, AlertCircle, FileText, CreditCard, MessageSquare, Settings } from 'lucide-react';
 import { Layout } from '@/components/Layout';
 
@@ -14,5 +14,32 @@ const navItems = [
 ];
 
 export default function CustomerLayout({ children }: { children: ReactNode }) {
-  return <Layout navItems={navItems}>{children}</Layout>;
+  useEffect(() => {
+    // Load ElevenLabs ConvAI widget script
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/@elevenlabs/convai-widget-embed';
+    script.async = true;
+    script.type = 'text/javascript';
+    
+    // Check if script is already loaded
+    const existingScript = document.querySelector('script[src="https://unpkg.com/@elevenlabs/convai-widget-embed"]');
+    if (!existingScript) {
+      document.body.appendChild(script);
+    }
+
+    // Cleanup function
+    return () => {
+      // Don't remove the script on unmount as it might be used by the widget
+      // The script will remain in the DOM for the session
+    };
+  }, []);
+
+  return (
+    <>
+      <Layout navItems={navItems}>{children}</Layout>
+      {/* ElevenLabs ConvAI Widget */}
+      {/* @ts-ignore - Custom web component */}
+      <elevenlabs-convai agent-id="agent_0801ka1yy0ycfrhbyn35ty2hpw03"></elevenlabs-convai>
+    </>
+  );
 }

@@ -247,7 +247,7 @@ def test_inventory_management_flow(client, admin_token, customer_token, products
     client.put(
         "/admin/inventory/SKU-001",
         headers={"Authorization": f"Bearer {admin_token}"},
-        json={"quantity": 200.0}
+        json={"quantity": 200}
     )
     
     # Verify inventory updated
@@ -255,5 +255,5 @@ def test_inventory_management_flow(client, admin_token, customer_token, products
         "/admin/inventory/SKU-001",
         headers={"Authorization": f"Bearer {admin_token}"}
     )
-    assert updated_inventory.json()["quantity"] == 200.0
+    assert updated_inventory.json()["quantity"] == 200
 

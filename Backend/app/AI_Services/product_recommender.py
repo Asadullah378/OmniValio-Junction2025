@@ -14,7 +14,7 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 PINECONE_API_KEY = os.getenv('PINECONE_API_KEY')
 PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME', 'hackathon2')
 PINECONE_HOST = os.getenv('PINECONE_HOST')
-EMBEDDING_MODEL = os.getenv('EMBEDDING_MODEL', 'text-embedding-3-small')
+EMBEDDING_MODEL = os.getenv('EMBEDDING_MODEL', 'text-embedding-3-large')
 PINECONE_DIMENSION = int(os.getenv('PINECONE_DIMENSION', '1024'))
 
 
@@ -46,7 +46,6 @@ class ProductRecommender:
             return
         
         try:
-            print("Initializing Product Recommender...")
             
             # Initialize clients
             self.openai_client = OpenAI(api_key=OPENAI_API_KEY)
@@ -57,7 +56,6 @@ class ProductRecommender:
             
             self.available = True
             self._initialized = True
-            print("Recommender ready!")
             
         except Exception as e:
             print(f"Error initializing Product Recommender: {e}")
@@ -81,40 +79,14 @@ class ProductRecommender:
         Build search text from database product for embedding
         Uses product fields to create a comprehensive search text
         """
-        parts = []
-        
-        # Product name (all languages)
-        if product.product_name:
-            parts.append(product.product_name)
-        if product.product_name_en:
-            parts.append(product.product_name_en)
-        if product.product_name_fi:
-            parts.append(product.product_name_fi)
-        
-        # Category information
-        if product.category:
-            parts.append(product.category)
-        if product.sub_category:
-            parts.append(product.sub_category)
-        
-        # Vendor and origin
-        if product.vendor_name:
-            parts.append(product.vendor_name)
-        if product.country_of_origin:
-            parts.append(product.country_of_origin)
-        
-        # Ingredients and marketing text
-        if product.ingredients:
-            parts.append(product.ingredients)
-        if product.marketing_text:
-            parts.append(product.marketing_text)
-        
-        # Allergens
-        if product.allergens:
-            parts.append(product.allergens)
-        
-        # Combine all parts
-        search_text = " ".join(parts)
+
+        search_text = f'Product: {product.product_name}. '
+        search_text += f'Category: {product.category}. '
+        search_text += f'Subcategory: {product.sub_category}. '
+        search_text += f'Main ingredients: {product.ingredients}. '
+        search_text += f'Vendor: {product.vendor_name}. '
+        search_text += f'Description: {product.marketing_text}. '
+
         return search_text
     
     def get_recommendations_by_text(
@@ -137,6 +109,7 @@ class ProductRecommender:
             return []
         
         try:
+
             # Generate embedding for the search text
             query_embedding = self.generate_embedding(search_text)
             

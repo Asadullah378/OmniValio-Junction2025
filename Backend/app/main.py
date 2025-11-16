@@ -9,6 +9,7 @@ from app.database import init_db
 from app.routers import auth
 from app.routers.customer import cart, products, orders, dashboard, claims, payments
 from app.routers.admin import orders as admin_orders, inventory, claims as admin_claims, customers, products as admin_products
+from app.routers import voice_agent
 
 # Initialize database
 init_db()
@@ -56,6 +57,9 @@ app.include_router(inventory.router)
 app.include_router(admin_claims.router)
 app.include_router(customers.router)
 app.include_router(admin_products.router)
+
+# Voice agent (bot) routers - unauthenticated
+app.include_router(voice_agent.router)
 
 
 @app.get("/")

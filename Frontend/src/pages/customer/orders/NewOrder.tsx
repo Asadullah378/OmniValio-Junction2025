@@ -1330,8 +1330,8 @@ export default function NewOrder() {
                           ) : similarProducts.length > 0 ? (
                             <div className="grid grid-cols-2 gap-4 items-stretch">
                               {similarProducts.map((similar: any) => {
-                                const similarRiskScore = shortageRisks[similar.product_code] ?? similar.risk_score;
-                                const similarRisk = getShortageRiskCategory(similarRiskScore);
+                                // const similarRiskScore = shortageRisks[similar.product_code] ?? similar.risk_score;
+                                // const similarRisk = getShortageRiskCategory(similarRiskScore);
                                 return (
                                   <Card key={similar.product_code} className="hover:shadow-md transition-shadow flex flex-col h-full min-h-0">
                                     <CardContent className="p-4 flex-1 flex flex-col space-y-3 min-h-0 justify-between">
@@ -1365,7 +1365,7 @@ export default function NewOrder() {
                                         )}
                                       </div>
                                       {/* AI Shortage Risk Score Display */}
-                                      {similarRiskScore !== null && similarRiskScore !== undefined && (
+                                      {/* {similarRiskScore !== null && similarRiskScore !== undefined && (
                                         <div className="flex items-center gap-2 text-xs">
                                           <Zap className="h-3 w-3 text-purple-500" />
                                           <span className="text-muted-foreground">AI Shortage Risk:</span>
@@ -1378,7 +1378,7 @@ export default function NewOrder() {
                                           {similarRisk.label}
                                         </Badge>
                                         </div>
-                                      )}
+                                      )} */}
                                       <div className="flex gap-2 mt-auto">
                                         <Button
                                           size="sm"

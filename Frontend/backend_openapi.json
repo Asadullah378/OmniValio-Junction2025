@@ -1613,7 +1613,7 @@
             "admin-inventory"
           ],
           "summary": "Get Inventory",
-          "description": "Get all inventory items",
+          "description": "Get all inventory items with pagination\n\n- **skip**: Number of items to skip (for pagination)\n- **limit**: Maximum number of items to return (default: 20)\n- **search**: Search by product code or product name",
           "operationId": "get_inventory_admin_inventory__get",
           "security": [
             {
@@ -1637,8 +1637,24 @@
               "required": false,
               "schema": {
                 "type": "integer",
-                "default": 100,
+                "default": 20,
                 "title": "Limit"
+              }
+            },
+            {
+              "name": "search",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Search"
               }
             }
           ],
@@ -1648,11 +1664,7 @@
               "content": {
                 "application/json": {
                   "schema": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/Inventory"
-                    },
-                    "title": "Response Get Inventory Admin Inventory  Get"
+                    "$ref": "#/components/schemas/PaginatedResponse_Inventory_"
                   }
                 }
               }
@@ -2498,7 +2510,7 @@
             "admin-products"
           ],
           "summary": "Get Products",
-          "description": "Get all products",
+          "description": "Get all products with pagination and filters\n\n- **skip**: Number of items to skip (for pagination)\n- **limit**: Maximum number of items to return (default: 20)\n- **category**: Filter by category name\n- **sub_category**: Filter by subcategory name\n- **search**: Search in product names, codes, and GTIN\n- **temperature_zone**: Filter by temperature zone (frozen, chilled, ambient)",
           "operationId": "get_products_admin_products__get",
           "security": [
             {
@@ -2522,8 +2534,72 @@
               "required": false,
               "schema": {
                 "type": "integer",
-                "default": 100,
+                "default": 20,
                 "title": "Limit"
+              }
+            },
+            {
+              "name": "category",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Category"
+              }
+            },
+            {
+              "name": "sub_category",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Sub Category"
+              }
+            },
+            {
+              "name": "search",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Search"
+              }
+            },
+            {
+              "name": "temperature_zone",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Temperature Zone"
               }
             }
           ],
@@ -2533,11 +2609,7 @@
               "content": {
                 "application/json": {
                   "schema": {
-                    "type": "array",
-                    "items": {
-                      "$ref": "#/components/schemas/Product"
-                    },
-                    "title": "Response Get Products Admin Products  Get"
+                    "$ref": "#/components/schemas/PaginatedResponse_Product_"
                   }
                 }
               }
@@ -3585,15 +3657,15 @@
               "title": "Product Code"
             },
             "quantity": {
-              "type": "number",
+              "type": "integer",
               "title": "Quantity"
             },
             "reserved_quantity": {
-              "type": "number",
+              "type": "integer",
               "title": "Reserved Quantity"
             },
             "available_quantity": {
-              "type": "number",
+              "type": "integer",
               "title": "Available Quantity"
             },
             "last_updated": {
@@ -3637,7 +3709,7 @@
         "InventoryUpdate": {
           "properties": {
             "quantity": {
-              "type": "number",
+              "type": "integer",
               "title": "Quantity"
             }
           },
@@ -4497,6 +4569,42 @@
             "updated_at"
           ],
           "title": "OrderWithDetails"
+        },
+        "PaginatedResponse_Inventory_": {
+          "properties": {
+            "items": {
+              "items": {
+                "$ref": "#/components/schemas/Inventory"
+              },
+              "type": "array",
+              "title": "Items"
+            },
+            "total": {
+              "type": "integer",
+              "title": "Total"
+            },
+            "skip": {
+              "type": "integer",
+              "title": "Skip"
+            },
+            "limit": {
+              "type": "integer",
+              "title": "Limit"
+            },
+            "has_more": {
+              "type": "boolean",
+              "title": "Has More"
+            }
+          },
+          "type": "object",
+          "required": [
+            "items",
+            "total",
+            "skip",
+            "limit",
+            "has_more"
+          ],
+          "title": "PaginatedResponse[Inventory]"
         },
         "PaginatedResponse_Product_": {
           "properties": {

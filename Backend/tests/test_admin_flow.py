@@ -119,11 +119,11 @@ def test_admin_manage_inventory(client, admin_token, products):
     response = client.put(
         "/admin/inventory/SKU-001",
         headers={"Authorization": f"Bearer {admin_token}"},
-        json={"quantity": 150.0}
+        json={"quantity": 150}
     )
     assert response.status_code == 200
-    assert response.json()["quantity"] == 150.0
-    assert response.json()["available_quantity"] == 150.0
+    assert response.json()["quantity"] == 150
+    assert response.json()["available_quantity"] == 150
 
 
 def test_admin_create_product(client, admin_token):

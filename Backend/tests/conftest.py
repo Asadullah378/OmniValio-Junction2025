@@ -134,8 +134,8 @@ def products(db):
         # Create inventory
         inventory = models.Inventory(
             product_code=product.product_code,
-            quantity=100.0,
-            available_quantity=100.0,
+            quantity=100,
+            available_quantity=100,
             updated_by="ADMIN-TEST"
         )
         db.add(inventory)

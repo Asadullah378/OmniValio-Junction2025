@@ -561,15 +561,15 @@ class Invoice(BaseModel):
 
 # Inventory
 class InventoryUpdate(BaseModel):
-    quantity: float
+    quantity: int
 
 
 class Inventory(BaseModel):
     inventory_id: int
     product_code: str
-    quantity: float
-    reserved_quantity: float
-    available_quantity: float
+    quantity: int
+    reserved_quantity: int
+    available_quantity: int
     last_updated: datetime
     updated_by: Optional[str] = None
     product: Optional[Product] = None

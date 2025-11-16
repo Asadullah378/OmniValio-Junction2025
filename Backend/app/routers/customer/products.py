@@ -207,7 +207,6 @@ def assess_products_risk(
             if shortage_probability > 0.5:
                 high_risk_count += 1
         
-        print(predictions)
         return schemas.BatchRiskAssessmentResponse(
             predictions=predictions,
             total_products=len(predictions),

@@ -118,7 +118,7 @@ export const customerProductsApi = {
     });
     return response.data;
   },
-  getSimilarProducts: async (productCode: string, limit: number = 5) => {
+  getSimilarProducts: async (productCode: string, limit: number = 6) => {
     const response = await api.get(`/customer/products/${productCode}/similar`, {
       params: { limit },
     });
@@ -303,8 +303,15 @@ export const adminCustomersApi = {
 
 // Admin Products API
 export const adminProductsApi = {
-  getProducts: async () => {
-    const response = await api.get('/admin/products/');
+  getProducts: async (params?: {
+    skip?: number;
+    limit?: number;
+    category?: string | null;
+    sub_category?: string | null;
+    search?: string | null;
+    temperature_zone?: string | null;
+  }) => {
+    const response = await api.get('/admin/products/', { params });
     return response.data;
   },
   getProduct: async (productCode: string) => {
@@ -327,8 +334,12 @@ export const adminProductsApi = {
 
 // Admin Inventory API
 export const adminInventoryApi = {
-  getInventory: async () => {
-    const response = await api.get('/admin/inventory/');
+  getInventory: async (params?: {
+    skip?: number;
+    limit?: number;
+    search?: string | null;
+  }) => {
+    const response = await api.get('/admin/inventory/', { params });
     return response.data;
   },
   getInventoryItem: async (productCode: string) => {

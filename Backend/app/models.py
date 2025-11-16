@@ -490,9 +490,9 @@ class Inventory(Base):
 
     inventory_id = Column(Integer, primary_key=True, autoincrement=True)
     product_code = Column(String, ForeignKey("products.product_code"), nullable=False, unique=True)
-    quantity = Column(Float, default=0.0, nullable=False)
-    reserved_quantity = Column(Float, default=0.0)  # Reserved for orders
-    available_quantity = Column(Float, default=0.0)  # Calculated: quantity - reserved_quantity
+    quantity = Column(Integer, default=0, nullable=False)
+    reserved_quantity = Column(Integer, default=0)  # Reserved for orders
+    available_quantity = Column(Integer, default=0)  # Calculated: quantity - reserved_quantity
     last_updated = Column(DateTime, default=func.now(), onupdate=func.now())
     updated_by = Column(String)  # admin user_id
 

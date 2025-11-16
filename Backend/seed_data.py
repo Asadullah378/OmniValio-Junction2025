@@ -40,7 +40,7 @@ try:
     customer_user = models.User(
         user_id="USER-001",
         username="unicafe",
-        email="customer1@test.fi",
+        email="unicafe@helsinki.fi",
         hashed_password=get_password_hash("customer123"),
         role=UserRole.CUSTOMER,
         customer_id="CUST-001",
@@ -101,8 +101,8 @@ try:
         # Create inventory entry
         inventory = models.Inventory(
             product_code=product.product_code,
-            quantity=100.0,
-            available_quantity=100.0,
+            quantity=100,
+            available_quantity=100,
             updated_by="ADMIN-001"
         )
         db.add(inventory)
