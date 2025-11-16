@@ -22,7 +22,9 @@ import {
   BarChart3,
   Zap,
   Menu,
-  X
+  X,
+  Phone,
+  Clock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -638,9 +640,97 @@ export default function Landing() {
               "Now our chefs know about problems before trucks leave the warehouse."
             </p>
             <p className="text-sm font-medium text-gray-900">
-              – Head of Operations, [Placeholder Company]
+              – Head of Operations, Unicafe, Kumpula
             </p>
           </Card>
+        </div>
+      </section>
+
+      {/* 24/7 Live AI Voice Agent */}
+      <section className="py-24 px-6 bg-[#F7F8FA]">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-full mb-6">
+              <Clock className="h-4 w-4 text-gray-600" />
+              <span className="text-sm font-medium text-gray-700">24/7 Available</span>
+            </div>
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">
+              24/7 Live AI Voice Agent
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Get instant help with our AI-powered voice agent, available round the clock on our website and via phone.
+            </p>
+          </div>
+
+          <div className="grid lg:grid-cols-2 gap-8 mb-12">
+            <Card className="p-8 bg-white border-0 shadow-md hover:shadow-lg transition-all duration-300">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-blue-50">
+                  <Bot className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Available on Website</h3>
+                  <p className="text-gray-600">
+                    Chat with our AI agent directly from the customer portal. Get instant answers about orders, inventory, claims, and more.
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <Card className="p-8 bg-white border-0 shadow-md hover:shadow-lg transition-all duration-300">
+              <div className="flex items-start gap-4 mb-6">
+                <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-blue-50">
+                  <Phone className="h-6 w-6 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Call Us Anytime</h3>
+                  <p className="text-gray-600 mb-4">
+                    Speak with our AI voice agent over the phone for immediate assistance.
+                  </p>
+                  <a 
+                    href="tel:+16505025185" 
+                    className="text-2xl font-semibold text-blue-600 hover:text-blue-700 transition-colors inline-flex items-center gap-2"
+                  >
+                    +1 (650) 502-5185
+                  </a>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                icon: Bot,
+                title: 'Instant Responses',
+                description: 'Get answers to common questions instantly'
+              },
+              {
+                icon: MessageSquare,
+                title: 'Order Tracking',
+                description: 'Check order status and delivery updates'
+              },
+              {
+                icon: Package,
+                title: 'Product Information',
+                description: 'Learn about products, availability, and substitutes'
+              },
+              {
+                icon: FileCheck,
+                title: 'Claims Support',
+                description: 'Get help with claims and refunds'
+              }
+            ].map((feature, idx) => (
+              <Card 
+                key={idx}
+                className="p-6 bg-white border-0 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+              >
+                <feature.icon className="h-8 w-8 text-blue-600 mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                <p className="text-sm text-gray-600">{feature.description}</p>
+              </Card>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -679,7 +769,7 @@ export default function Landing() {
                     required
                     value={formData.company}
                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                    placeholder="Your company"
+                    placeholder="Unicafe, Kumpula"
                     className="w-full"
                   />
                 </div>
