@@ -37,7 +37,7 @@ pm2 delete omni-valio-backend 2>/dev/null || true
 echo "Starting FastAPI application with PM2..."
 pm2 start "$PYTHON_CMD" --name "omni-valio-backend" -- \
     -m uvicorn app.main:app \
-    --host 0.0.0.0 \
+    --host 127.0.0.1 \
     --port 8000
 
 # Save PM2 process list
